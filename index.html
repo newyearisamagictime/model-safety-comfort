@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Comparative Life Parameters</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --toast-bg: #333;
+            --toast-text: #fff;
+        }
+        html, body {
+            height: 100%;
+            font-family: 'Inter', sans-serif;
+        }
+        body {
+            background-color: #f3f4f6;
+        }
+        .table-container {
+            width: 100%;
+            overflow-x: auto;
+        }
+        .sticky-header th {
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+        .sticky-col {
+            position: sticky;
+            left: 0;
+            z-index: 5;
+            background-color: #f9fafb;
+        }
+        /* Ensure sticky columns have a background in both standard and transposed views */
+        .transposed-table .sticky-col, .standard-table .sticky-col {
+             background-color: #f9fafb;
+        }
+         .transposed-table tr:hover .sticky-col, .standard-table tr:hover .sticky-col {
+             background-color: #f3f4f6; /* Slightly darker on hover */
+        }
+
+        .sticky-col-header {
+            position: sticky;
+            left: 0;
+            z-index: 15;
+        }
+        .toast-notification {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: var(--toast-bg);
+            color: var(--toast-text);
+            padding: 12px 24px;
+            border-radius: 8px;
+            z-index: 1000;
+            opacity: 0;
+            transition: opacity 0.3s ease, transform 0.3s ease;
+            pointer-events: none;
+        }
+        .toast-notification.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        /* Styles for showing text or input in a cell */
+        .score-cell .score-input {
+            display: none;
+        }
+        .score-cell.editing .score-text {
+            display: none;
+        }
+        .score-cell.editing .score-input {
+            display: block;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 text-gray-800">
+
+    <div id="app" class="container mx-auto p-4 md:p-6 lg:p-8">
+        
+        <!-- Header -->
+        <header class="flex flex-wrap justify-between items-center mb-6 gap-y-4">
+            <h1 class="text-2xl md:text-3xl font-bold text-gray-700 w-full md:w-auto">Comparative Life Parameters</h1>
+            <div class="flex items-center space-x-2 flex-wrap gap-2">
+                <select id="language-switcher" class="bg-white border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 text-sm">
+                    <option value="en">English</option>
+                    <option value="ru">Русский</option>
+                </select>
+                 <button id="transpose-btn" class="bg-purple-600 text-white px-4 py-2 rounded-md shadow-sm hover:bg-purple-700 transition-colors">
+                    <span data-lang-key="transpose_table">Transpose</span>
+                </button>
+                <button id="edit-params-btn" class="bg-indigo-600 text-white px-4 py-2 rounded-md shadow-sm hover:bg-indigo-700 transition-colors">
+                    <span data-lang-key="edit_parameters">Edit Parameters</span>
+                </button>
+                <button id="export-btn" class="bg-green-600 text-white px-4 py-2 rounded-md shadow-sm hover:bg-green-700 transition-colors">
+                    <span data-lang-key="export_json">Export JSON</span>
+                </button>
+                <label for="import-file" class="bg-blue-600 text-white px-4 py-2 rounded-md shadow-sm hover:bg-blue-700 transition-colors cursor-pointer">
+                    <span data-lang-key="import_json">Import JSON</span>
+                    <input type="file" id="import-file" class="hidden" accept=".json">
+                </label>
+            </div>
+        </header>
+
+        <!-- Search / Filter -->
+        <div class="mb-4">
+            <input id="search-box" type="text" placeholder="Filter options..." data-lang-placeholder="filter_options" class="w-full md:w-1/3 p-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+        </div>
+
+        <!-- Main Table -->
+        <div id="table-container" class="table-container bg-white shadow-lg rounded-lg">
+            <table id="main-table" class="w-full text-left">
+                <thead id="table-header">
+                    <!-- Header will be dynamically generated -->
+                </thead>
+                <tbody id="table-body">
+                    <!-- Body will be dynamically generated -->
+                </tbody>
+            </table>
+        </div>
+        <div class="mt-4">
+            <button id="add-option-btn" class="bg-blue-500 text-white px-4 py-2 rounded-md shadow hover:bg-blue-600 transition-colors">
+                <span data-lang-key="add_option">Add Option</span>
+            </button>
+        </div>
+
+    </div>
+
+    <!-- Parameter Editor Modal -->
+    <div id="param-editor-modal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-20">
+        <div class="relative top-20 mx-auto p-5 border w-full max-w-4xl shadow-lg rounded-md bg-white">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-xl font-bold" data-lang-key="parameter_editor">Parameter Editor</h3>
+                <button id="close-modal-btn" class="text-gray-500 hover:text-gray-800">&times;</button>
+            </div>
+            <div id="param-list" class="space-y-4 max-h-[70vh] overflow-y-auto pr-2">
+                <!-- Parameter items will be dynamically generated -->
+            </div>
+            <div class="mt-6 flex justify-between">
+                <button id="add-param-btn" class="bg-green-500 text-white px-4 py-2 rounded-md shadow hover:bg-green-600">
+                    <span data-lang-key="add_parameter">Add Parameter</span>
+                </button>
+                <button id="save-params-btn" class="bg-indigo-600 text-white px-4 py-2 rounded-md shadow hover:bg-indigo-700">
+                    <span data-lang-key="save_and_close">Save & Close</span>
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Toast Notification -->
+    <div id="toast" class="toast-notification"></div>
+
+    <script type="module">
+        // --- DATA AND STATE MANAGEMENT ---
+        const state = {
+            lang: 'ru', // Default to Russian
+            isTransposed: false,
+            parameters: [],
+            options: [],
+            colorMap: new Map(),
+            descriptionMap: new Map(),
+        };
+
+        const i18n = {
+            en: {
+                edit_parameters: "Edit Parameters",
+                export_json: "Export JSON",
+                import_json: "Import JSON",
+                transpose_table: "Transpose",
+                filter_options: "Filter options by name...",
+                option_name: "Option Name",
+                notes_price: "Notes / Price",
+                actions: "Actions",
+                add_option: "Add Option",
+                parameter_editor: "Parameter Editor",
+                add_parameter: "Add Parameter",
+                save_and_close: "Save & Close",
+                delete: "Delete",
+                score: "Score",
+                color: "Color",
+                description: "Description",
+                parameter_name: "Parameter Name",
+                parameter: "Parameter",
+                new_option_name: "New Option",
+                new_option_notes: "Notes...",
+                new_parameter_name: "New Parameter",
+                default_palette_desc: "Description for score",
+                import_success: "Data imported successfully!",
+                import_error: "Failed to read or parse JSON file.",
+                changes_saved: "Changes saved automatically.", // This message is no longer shown, but kept for i18n
+                no_params_title: "No Parameters Found",
+                no_params_text: "Click 'Edit Parameters' to get started.",
+                no_options_title: "No Options Found",
+                no_options_text: "Click 'Add Option' to create your first scenario.",
+            },
+            ru: {
+                edit_parameters: "Ред. параметры",
+                export_json: "Экспорт JSON",
+                import_json: "Импорт JSON",
+                transpose_table: "Транспонировать",
+                filter_options: "Фильтр по названию...",
+                option_name: "Название опции",
+                notes_price: "Заметки / Цена",
+                actions: "Действия",
+                add_option: "Добавить опцию",
+                parameter_editor: "Редактор параметров",
+                add_parameter: "Добавить параметр",
+                save_and_close: "Сохранить и закрыть",
+                delete: "Удалить",
+                score: "Оценка",
+                color: "Цвет",
+                description: "Описание",
+                parameter_name: "Название параметра",
+                parameter: "Параметр",
+                new_option_name: "Новая опция",
+                new_option_notes: "Заметки...",
+                new_parameter_name: "Новый параметр",
+                default_palette_desc: "Описание для оценки",
+                import_success: "Данные успешно импортированы!",
+                import_error: "Не удалось прочитать или обработать JSON файл.",
+                changes_saved: "Изменения сохранены автоматически.", // Это сообщение больше не отображается, но оставлено для полноты i18n
+                no_params_title: "Параметры не найдены",
+                no_params_text: "Нажмите 'Ред. параметры', чтобы начать.",
+                no_options_title: "Опции не найдены",
+                no_options_text: "Нажмите 'Добавить опцию', чтобы создать первый сценарий.",
+            }
+        };
+
+        const getLangString = (key) => i18n[state.lang][key] || key;
+        
+        const updateUIText = () => {
+            document.querySelectorAll('[data-lang-key]').forEach(el => {
+                const key = el.getAttribute('data-lang-key');
+                if (i18n[state.lang] && i18n[state.lang][key]) {
+                    el.textContent = i18n[state.lang][key];
+                }
+            });
+             document.querySelectorAll('[data-lang-placeholder]').forEach(el => {
+                const key = el.getAttribute('data-lang-placeholder');
+                if (i18n[state.lang] && i18n[state.lang][key]) {
+                    el.placeholder = i18n[state.lang][key];
+                }
+            });
+            renderTable();
+        };
+        
+        // --- Utility Functions ---
+
+        // NEW: Убрано навязчивое уведомление. Теперь оно показывается только для важных событий (например, импорт).
+        const showToast = (messageKey) => {
+            const toast = document.getElementById('toast');
+            toast.textContent = getLangString(messageKey);
+            toast.classList.add('show');
+            setTimeout(() => { toast.classList.remove('show'); }, 3000);
+        };
+
+        // NEW: Эта функция сохраняет все текущие данные (параметры и опции) в localStorage браузера.
+        const saveState = () => { 
+            try { 
+                localStorage.setItem('gemini.parameters', JSON.stringify(state.parameters)); 
+                localStorage.setItem('gemini.options', JSON.stringify(state.options)); 
+            } catch (e) { 
+                console.error("Error saving to localStorage:", e); 
+            } 
+        };
+
+        // NEW: Эта функция загружает данные из localStorage при запуске приложения.
+        // Если сохраненных данных нет, она использует начальные данные.
+        const loadState = async () => {
+            const savedLang = localStorage.getItem('gemini.lang'); 
+            if (savedLang) state.lang = savedLang;
+
+            const savedParams = localStorage.getItem('gemini.parameters'); 
+            const savedOptions = localStorage.getItem('gemini.options');
+
+            if (savedParams && savedOptions) { 
+                state.parameters = JSON.parse(savedParams); 
+                state.options = JSON.parse(savedOptions); 
+            } else { 
+                const d = getInitialData(); 
+                state.parameters = d.parameters; 
+                state.options = d.options; 
+            }
+            state.parameters.sort((a, b) => a.order - b.order); 
+            rebuildMappings(); 
+            updateUIText();
+        };
+
+        const rebuildMappings = () => {
+            state.colorMap.clear(); state.descriptionMap.clear(); const descKey = `description_${state.lang}`;
+            for (const param of state.parameters) {
+                const paramColorMap = new Map(); const paramDescMap = new Map(); const sortedPalette = [...param.palette].sort((a,b) => b.score - a.score);
+                for (const p of sortedPalette) { paramColorMap.set(p.score, p.colour); const d = p[descKey] || p.description_en; if(d) { paramDescMap.set(p.score, d); } }
+                state.colorMap.set(param.id, paramColorMap); state.descriptionMap.set(param.id, paramDescMap);
+            }
+        };
+
+        function getDescriptionForScore(paramId, score) {
+            if (score === null || score === undefined || score === '') return ''; const numericScore = Number(score);
+            const paramDescMap = state.descriptionMap.get(paramId); if (!paramDescMap) return String(score); if (paramDescMap.has(numericScore)) { return paramDescMap.get(numericScore); }
+            let prevDesc = null; let nextDesc = null;
+            for (let i = numericScore - 1; i >= 1; i--) { if (paramDescMap.has(i)) { prevDesc = paramDescMap.get(i); break; } }
+            for (let i = numericScore + 1; i <= 10; i++) { if (paramDescMap.has(i)) { nextDesc = paramDescMap.get(i); break; } }
+            if (prevDesc && nextDesc) return `> ${prevDesc}, < ${nextDesc}`; if (prevDesc) return `> ${prevDesc}`; if (nextDesc) return `< ${nextDesc}`; return String(score);
+        }
+
+        // --- RENDERING LOGIC (Unchanged) ---
+
+        function renderTable() {
+            const table = document.getElementById('main-table');
+            const header = document.getElementById('table-header');
+            const body = document.getElementById('table-body');
+            
+            table.className = `w-full text-left ${state.isTransposed ? 'transposed-table' : 'standard-table'}`;
+
+            if (state.isTransposed) {
+                renderTransposedHeader(header);
+                renderTransposedBody(body);
+            } else {
+                renderStandardHeader(header);
+                renderStandardBody(body);
+            }
+            if (state.parameters.length === 0) {
+                 body.innerHTML = `<tr><td colspan="3" class="text-center p-8"><h3 class="text-lg font-bold">${getLangString('no_params_title')}</h3><p>${getLangString('no_params_text')}</p></td></tr>`;
+            }
+        }
+
+        function renderStandardHeader(header) {
+            const nameKey = `name_${state.lang}`;
+            let headerHTML = '<tr>';
+            headerHTML += `<th class="p-3 text-sm font-semibold tracking-wide text-left sticky-col-header bg-gray-200">${getLangString('option_name')}</th>`;
+            headerHTML += `<th class="p-3 text-sm font-semibold tracking-wide text-left bg-gray-200">${getLangString('notes_price')}</th>`;
+            state.parameters.forEach(param => {
+                headerHTML += `<th class="p-3 text-sm font-semibold tracking-wide text-left bg-gray-200">${param[nameKey] || param.name_en}</th>`;
+            });
+            headerHTML += `<th class="p-3 text-sm font-semibold tracking-wide text-center bg-gray-200">${getLangString('actions')}</th>`;
+            headerHTML += '</tr>';
+            header.innerHTML = headerHTML;
+        }
+
+        function renderStandardBody(body) {
+            const filterText = document.getElementById('search-box').value.toLowerCase();
+            const filteredOptions = state.options.filter(opt => opt.title.toLowerCase().includes(filterText));
+
+            if (state.parameters.length > 0 && filteredOptions.length === 0) {
+                 body.innerHTML = `<tr><td colspan="${state.parameters.length + 3}" class="text-center p-8"><h3 class="text-lg font-bold">${getLangString('no_options_title')}</h3><p>${getLangString('no_options_text')}</p></td></tr>`;
+                 return;
+            }
+
+            let bodyHTML = '';
+            filteredOptions.forEach((option, optionIndex) => {
+                bodyHTML += `<tr class="bg-white hover:bg-gray-100 border-b border-gray-200" data-option-id="${option.id}">`;
+                bodyHTML += `<td class="p-3 text-sm text-gray-700 font-medium sticky-col" contenteditable="true" data-field="title">${option.title}</td>`;
+                bodyHTML += `<td class="p-3 text-sm text-gray-500 bg-white" contenteditable="true" data-field="price">${option.price}</td>`;
+                state.parameters.forEach((param, paramIndex) => {
+                    const score = option.scores[param.id] || '';
+                    const color = state.colorMap.get(param.id)?.get(Number(score)) || '#FFFFFF';
+                    const displayText = getDescriptionForScore(param.id, score);
+                    bodyHTML += `
+                        <td class="p-0 text-center score-cell" style="background-color: ${color};" 
+                            data-option-id="${option.id}" data-param-id="${param.id}" 
+                            data-option-index="${optionIndex}" data-param-index="${paramIndex}">
+                            <span class="score-text p-3 block cursor-pointer text-xs h-full">${displayText}</span>
+                            <input type="number" min="1" max="10" value="${score}" class="score-input w-full h-full p-3 bg-transparent text-center font-semibold focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white">
+                        </td>`;
+                });
+                bodyHTML += `<td class="p-3 text-center bg-white"><button class="text-red-500 hover:text-red-700 delete-option-btn" data-option-id="${option.id}">${getLangString('delete')}</button></td>`;
+                bodyHTML += '</tr>';
+            });
+            body.innerHTML = bodyHTML;
+        }
+
+        function renderTransposedHeader(header) {
+            let headerHTML = '<tr>';
+            headerHTML += `<th class="p-3 text-sm font-semibold tracking-wide text-left sticky-col-header bg-gray-200">${getLangString('parameter')}</th>`;
+            const filterText = document.getElementById('search-box').value.toLowerCase();
+            const filteredOptions = state.options.filter(opt => opt.title.toLowerCase().includes(filterText));
+
+            filteredOptions.forEach(option => {
+                headerHTML += `<th class="p-3 text-sm font-semibold tracking-wide text-left bg-gray-200">${option.title}</th>`;
+            });
+            headerHTML += '</tr>';
+            header.innerHTML = headerHTML;
+        }
+
+        function renderTransposedBody(body) {
+            const nameKey = `name_${state.lang}`;
+            const filterText = document.getElementById('search-box').value.toLowerCase();
+            const filteredOptions = state.options.filter(opt => opt.title.toLowerCase().includes(filterText));
+            
+            if (state.parameters.length > 0 && filteredOptions.length === 0) {
+                 body.innerHTML = `<tr><td colspan="${state.parameters.length + 1}" class="text-center p-8"><h3 class="text-lg font-bold">${getLangString('no_options_title')}</h3><p>${getLangString('no_options_text')}</p></td></tr>`;
+                 return;
+            }
+
+            let bodyHTML = '';
+            state.parameters.forEach((param, paramIndex) => {
+                bodyHTML += `<tr class="bg-white hover:bg-gray-100 border-b border-gray-200" data-param-id="${param.id}">`;
+                bodyHTML += `<td class="p-3 text-sm text-gray-700 font-medium sticky-col">${param[nameKey] || param.name_en}</td>`;
+                filteredOptions.forEach((option, optionIndex) => {
+                    const score = option.scores[param.id] || '';
+                    const color = state.colorMap.get(param.id)?.get(Number(score)) || '#FFFFFF';
+                    const displayText = getDescriptionForScore(param.id, score);
+                    bodyHTML += `
+                        <td class="p-0 text-center score-cell" style="background-color: ${color};" 
+                            data-option-id="${option.id}" data-param-id="${param.id}" 
+                            data-option-index="${optionIndex}" data-param-index="${paramIndex}">
+                            <span class="score-text p-3 block cursor-pointer text-xs h-full">${displayText}</span>
+                            <input type="number" min="1" max="10" value="${score}" class="score-input w-full h-full p-3 bg-transparent text-center font-semibold focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white">
+                        </td>`;
+                });
+                bodyHTML += `</tr>`;
+            });
+            body.innerHTML = bodyHTML;
+        }
+
+        const renderParamEditor = () => {
+            const paramList = document.getElementById('param-list'); paramList.innerHTML = '';
+            const nameKey = `name_${state.lang}`; const descKey = `description_${state.lang}`;
+            state.parameters.forEach((param) => {
+                const paramDiv = document.createElement('div'); paramDiv.className = 'p-4 border rounded-lg bg-gray-50'; paramDiv.dataset.paramId = param.id;
+                let paletteHTML = ''; const sortedPalette = [...param.palette].sort((a, b) => b.score - a.score);
+                sortedPalette.forEach(p => { paletteHTML += `<div class="grid grid-cols-12 gap-2 items-center mb-1"><span class="col-span-1 text-center font-medium">${p.score}</span><div class="col-span-2"><input type="color" value="${p.colour}" data-score="${p.score}" data-field="colour" class="w-full h-8 border-none rounded cursor-pointer"></div><div class="col-span-9"><input type="text" value="${p[descKey] || p.description_en || ''}" data-score="${p.score}" data-field="description" class="w-full p-1 border border-gray-300 rounded-md text-sm"></div></div>`; });
+                paramDiv.innerHTML = `<div class="flex justify-between items-center mb-3"><input type="text" value="${param[nameKey] || param.name_en}" data-field="name" class="text-lg font-semibold border-b-2 border-transparent focus:border-indigo-500 focus:outline-none w-full"><button class="text-red-500 hover:text-red-700 ml-4 delete-param-btn" data-param-id="${param.id}">${getLangString('delete')}</button></div><div class="grid grid-cols-12 gap-2 text-sm font-semibold mb-2"><div class="col-span-1 text-center">${getLangString('score')}</div><div class="col-span-2">${getLangString('color')}</div><div class="col-span-9">${getLangString('description')}</div></div>${paletteHTML}`;
+                paramList.appendChild(paramDiv);
+            });
+        };
+
+        // --- EVENT HANDLERS ---
+        function handleTableInteraction(e) {
+            const target = e.target; const optionId = target.closest('[data-option-id]')?.dataset.optionId;
+            if (!optionId) return; const option = state.options.find(o => o.id === optionId); if (!option) return;
+            if (target.isContentEditable) { target.addEventListener('blur', () => { const field = target.dataset.field; if (field === 'title' || field === 'price') { option[field] = target.textContent; saveState(); } }, { once: true }); }
+            if (target.closest('.delete-option-btn')) { state.options = state.options.filter(o => o.id !== optionId); saveState(); renderTable(); }
+            const scoreCell = target.closest('.score-cell'); if (scoreCell && !scoreCell.classList.contains('editing')) { scoreCell.classList.add('editing'); const input = scoreCell.querySelector('.score-input'); input.focus(); input.select(); }
+        }
+        
+        function handleScoreInput(e) {
+            const input = e.target; if (!input.matches('.score-input')) return; const scoreCell = input.closest('.score-cell'); const { optionId, paramId } = scoreCell.dataset; const option = state.options.find(o => o.id === optionId);
+            if (option) { let value = parseInt(input.value, 10); if (isNaN(value)) value = ''; else if (value < 1) value = 1; else if (value > 10) value = 10; input.value = value; option.scores[paramId] = value; scoreCell.style.backgroundColor = state.colorMap.get(paramId)?.get(value) || '#FFFFFF'; saveState(); }
+        }
+
+        function handleScoreBlur(e) {
+            const input = e.target; if (!input.matches('.score-input')) return; const scoreCell = input.closest('.score-cell');
+            if (scoreCell) { const displayText = getDescriptionForScore(scoreCell.dataset.paramId, input.value); scoreCell.querySelector('.score-text').textContent = displayText; scoreCell.classList.remove('editing'); }
+        }
+        
+        function handleTableKeyDown(e) {
+            if (!e.target.matches('.score-input')) return;
+            const scoreCell = e.target.closest('.score-cell');
+            let { optionIndex, paramIndex } = scoreCell.dataset;
+            optionIndex = parseInt(optionIndex);
+            paramIndex = parseInt(paramIndex);
+            let nextElement = null;
+            const move = (d_opt, d_par) => document.querySelector(`[data-option-index="${optionIndex + d_opt}"][data-param-index="${paramIndex + d_par}"]`);
+            switch (e.key) {
+                case 'ArrowUp': nextElement = state.isTransposed ? move(0, -1) : move(0, -1); break;
+                case 'ArrowDown': case 'Enter': nextElement = state.isTransposed ? move(0, 1) : move(0, 1); break;
+                case 'ArrowLeft': nextElement = state.isTransposed ? move(-1, 0) : move(-1, 0); break;
+                case 'ArrowRight': nextElement = state.isTransposed ? move(1, 0) : move(1, 0); break;
+                case 'Escape': e.target.blur(); break;
+            }
+            if (nextElement) {
+                e.preventDefault();
+                nextElement.classList.add('editing'); const nextInput = nextElement.querySelector('.score-input'); nextInput.focus(); nextInput.select();
+            }
+        }
+        
+        // --- Button Listeners (updates highlighted) ---
+        document.getElementById('transpose-btn').addEventListener('click', () => {
+            state.isTransposed = !state.isTransposed;
+            renderTable();
+        });
+        document.getElementById('edit-params-btn').addEventListener('click', () => { renderParamEditor(); document.getElementById('param-editor-modal').classList.remove('hidden'); });
+        document.getElementById('close-modal-btn').addEventListener('click', () => { document.getElementById('param-editor-modal').classList.add('hidden'); });
+        
+        // NEW: "Save" button in modal now saves state and redraws table
+        document.getElementById('save-params-btn').addEventListener('click', () => { saveState(); renderTable(); document.getElementById('param-editor-modal').classList.add('hidden'); });
+        
+        document.getElementById('add-param-btn').addEventListener('click', () => {
+            const newId = `param_${Date.now()}`; const newOrder = state.parameters.length > 0 ? Math.max(...state.parameters.map(p => p.order)) + 1 : 1;
+            const newParam = { id: newId, order: newOrder, name_ru: getLangString('new_parameter_name'), name_en: getLangString('new_parameter_name'), palette: Array.from({ length: 10 }, (_, i) => ({ score: 10 - i, colour: "#cccccc", description_en: ``, description_ru: `` })) };
+            state.parameters.push(newParam); renderParamEditor();
+        });
+        
+        // NEW: Adding an option now saves the state immediately
+        document.getElementById('add-option-btn').addEventListener('click', () => {
+            const newId = `option_${Date.now()}`; const newOption = { id: newId, title: getLangString('new_option_name'), price: getLangString('new_option_notes'), scores: {} };
+            state.options.push(newOption); saveState(); renderTable();
+        });
+        
+        const tableBody = document.getElementById('table-body');
+        tableBody.addEventListener('click', handleTableInteraction);
+        tableBody.addEventListener('input', handleScoreInput);
+        tableBody.addEventListener('focusout', handleScoreBlur);
+        tableBody.addEventListener('keydown', handleTableKeyDown);
+
+        document.getElementById('search-box').addEventListener('input', () => renderTable());
+        
+        document.getElementById('param-list').addEventListener('input', (e) => {
+             const t = e.target; const pDiv = t.closest('[data-param-id]'); if (!pDiv) return; const pId = pDiv.dataset.paramId; const p = state.parameters.find(p => p.id === pId); if (!p) return; const f = t.dataset.field;
+             if (f === 'name') { p[`name_${state.lang}`] = t.value; } else if(f === 'colour' || f === 'description') { const s = parseInt(t.dataset.score, 10); const pItem = p.palette.find(p => p.score === s); if(pItem) { if(f === 'colour') pItem.colour = t.value; else pItem[`description_${state.lang}`] = t.value; } }
+             rebuildMappings();
+        });
+        
+        document.getElementById('param-list').addEventListener('click', (e) => {
+            if(e.target.closest('.delete-param-btn')) { const pId = e.target.closest('.delete-param-btn').dataset.paramId; state.parameters = state.parameters.filter(p => p.id !== pId); state.options.forEach(opt => delete opt.scores[pId]); renderParamEditor(); }
+        });
+        
+        document.getElementById('export-btn').addEventListener('click', () => {
+            const dataToExport = { parameters: state.parameters, options: state.options }; const dataStr = JSON.stringify(dataToExport, null, 2); const blob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(blob); const a = document.createElement('a'); const date = new Date().toISOString().slice(0, 10).replace(/-/g, ''); a.href = url; a.download = `gemini-data-${date}.json`; a.click(); URL.revokeObjectURL(url);
+        });
+        
+        document.getElementById('import-file').addEventListener('change', (event) => {
+            const file = event.target.files[0]; if (!file) return; const reader = new FileReader();
+            reader.onload = (e) => {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    if (data.parameters && data.options) { state.parameters = data.parameters; state.options = data.options; state.parameters.sort((a, b) => a.order - b.order); saveState(); rebuildMappings(); updateUIText(); showToast('import_success'); } else { showToast('import_error'); }
+                } catch (err) { console.error("Import error:", err); showToast('import_error'); }
+            };
+            reader.readAsText(file); event.target.value = '';
+        });
+        
+        document.getElementById('language-switcher').addEventListener('change', (e) => { state.lang = e.target.value; localStorage.setItem('gemini.lang', state.lang); rebuildMappings(); updateUIText(); });
+
+        // --- INITIAL DATA (Unchanged) ---
+        function getInitialData() {
+            return {
+                "parameters": [
+                    {"id": "safety_global","order": 1,"name_ru": "Безопасность страны в мире","name_en": "Country safety globally","palette": [{"score": 10,"colour": "#00C853","description_ru": "Копибара","description_en": ""},{"score": 9,"colour": "#1BCB3F","description_ru": "Неуязвимый","description_en": ""},{"score": 8,"colour": "#64DD17","description_ru": "","description_en": ""},{"score": 7,"colour": "#C6FF00","description_ru": "","description_en": ""},{"score": 6,"colour": "#FFEB3B","description_ru": "Выпендривается","description_en": ""},{"score": 5,"colour": "#FFC107","description_ru": "","description_en": ""},{"score": 4,"colour": "#FF9800","description_ru": "Войну предсказывают","description_en": ""},{"score": 3,"colour": "#FF5722","description_ru": "Война объявлена","description_en": ""},{"score": 2,"colour": "#F44336","description_ru": "Война","description_en": ""},{"score": 1,"colour": "#D50000","description_ru": "","description_en": ""}]},
+                    {"id": "safety_overall","order": 2,"name_ru": "Общая безопасность в стране","name_en": "Overall safety in country","palette": [{"score": 10,"colour": "#00C853","description_ru": "Рай","description_en": ""},{"score": 9,"colour": "#1BCB3F","description_ru": "","description_en": ""},{"score": 8,"colour": "#64DD17","description_ru": "","description_en": ""},{"score": 7,"colour": "#C6FF00","description_ru": "","description_en": ""},{"score": 6,"colour": "#FFEB3B","description_ru": "Куча шпаны","description_en": ""},{"score": 5,"colour": "#FFC107","description_ru": "Полицейское государство","description_en": ""},{"score": 4,"colour": "#FF9800","description_ru": "","description_en": ""},{"score": 3,"colour": "#FF5722","description_ru": "Картели","description_en": ""},{"score": 2,"colour": "#F44336","description_ru": "Гражданская война","description_en": ""},{"score": 1,"colour": "#D50000","description_ru": "","description_en": ""}]},
+                    {"id": "safety_personal","order": 3,"name_ru": "Моя безопасность в стране","name_en": "My safety in country","palette": [{"score": 10,"colour": "#00C853","description_ru": "Мы вас любим","description_en": ""},{"score": 9,"colour": "#1BCB3F","description_ru": "Вы уже как все","description_en": ""},{"score": 8,"colour": "#64DD17","description_ru": "","description_en": ""},{"score": 7,"colour": "#C6FF00","description_ru": "Интегрируйтесь","description_en": ""},{"score": 6,"colour": "#FFEB3B","description_ru": "Понаехали","description_en": ""},{"score": 5,"colour": "#FFC107","description_ru": "Вам будет неприятно","description_en": ""},{"score": 4,"colour": "#FF9800","description_ru": "","description_en": ""},{"score": 3,"colour": "#FF5722","description_ru": "Гетто","description_en": ""},{"score": 2,"colour": "#F44336","description_ru": "Мы вас изрежем","description_en": ""},{"score": 1,"colour": "#D50000","description_ru": "","description_en": ""}]},
+                    {"id": "civil_status","order": 4,"name_ru": "Мой гражданский статус","name_en": "My civil status","palette": [{"score": 10,"colour": "#00C853","description_ru": "Гражданин по рождению","description_en": ""},{"score": 9,"colour": "#1BCB3F","description_ru": "Гражданин","description_en": ""},{"score": 8,"colour": "#64DD17","description_ru": "ПМЖ","description_en": ""},{"score": 7,"colour": "#C6FF00","description_ru": "ВНЖ","description_en": ""},{"score": 6,"colour": "#FFEB3B","description_ru": "Цифровой кочевник","description_en": ""},{"score": 5,"colour": "#FFC107","description_ru": "Рабочая виза","description_en": ""},{"score": 4,"colour": "#FF9800","description_ru": "3 месяца без визы","description_en": ""},{"score": 3,"colour": "#FF5722","description_ru": "Беженец","description_en": ""},{"score": 2,"colour": "#F44336","description_ru": "Нелегал","description_en": ""},{"score": 1,"colour": "#D50000","description_ru": "","description_en": ""}]},
+                    {"id": "languages","order": 5,"name_ru": "Языки страны","name_en": "Country languages","palette": [{"score": 10,"colour": "#00C853","description_ru": "Русский + английский","description_en": ""},{"score": 9,"colour": "#1BCB3F","description_ru": "","description_en": ""},{"score": 8,"colour": "#64DD17","description_ru": "Английский","description_en": ""},{"score": 7,"colour": "#C6FF00","description_ru": "","description_en": ""},{"score": 6,"colour": "#FFEB3B","description_ru": "Национальный + английский 50%","description_en": ""},{"score": 5,"colour": "#FFC107","description_ru": "Национальный + английский 20%","description_en": ""},{"score": 4,"colour": "#FF9800","description_ru": "","description_en": ""},{"score": 3,"colour": "#FF5722","description_ru": "","description_en": ""},{"score": 2,"colour": "#F44336","description_ru": "Национальный","description_en": ""},{"score": 1,"colour": "#D50000","description_ru": "","description_en": ""}]},
+                    {"id": "cost_of_living","order": 6,"name_ru": "Уровень цен","name_en": "Cost of living","palette": [{"score": 10,"colour": "#00C853","description_ru": "Братислава","description_en": ""},{"score": 9,"colour": "#1BCB3F","description_ru": "","description_en": ""},{"score": 8,"colour": "#64DD17","description_ru": "","description_en": ""},{"score": 7,"colour": "#C6FF00","description_ru": "","description_en": ""},{"score": 6,"colour": "#FFEB3B","description_ru": "","description_en": ""},{"score": 5,"colour": "#FFC107","description_ru": "","description_en": ""},{"score": 4,"colour": "#FF9800","description_ru": "","description_en": ""},{"score": 3,"colour": "#FF5722","description_ru": "","description_en": ""},{"score": 2,"colour": "#F44336","description_ru": "Цюрих","description_en": ""},{"score": 1,"colour": "#D50000","description_ru": "","description_en": ""}]},
+                    {"id": "housing","order": 7,"name_ru": "Жильё","name_en": "Housing","palette": [{"score": 10,"colour": "#00C853","description_ru": "Вилла в городе","description_en": ""},{"score": 9,"colour": "#1BCB3F","description_ru": "Дом-5 в городе","description_en": ""},{"score": 8,"colour": "#64DD17","description_ru": "Квартира-5 в городе","description_en": ""},{"score": 7,"colour": "#C6FF00","description_ru": "Дом-5 за городом","description_en": ""},{"score": 6,"colour": "#FFEB3B","description_ru": "Квартира-4 на окраине","description_en": ""},{"score": 5,"colour": "#FFC107","description_ru": "Квартира-2 в центре","description_en": ""},{"score": 4,"colour": "#FF9800","description_ru": "Квартира-2 на окраине","description_en": ""},{"score": 3,"colour": "#FF5722","description_ru": "","description_en": ""},{"score": 2,"colour": "#F44336","description_ru": "","description_en": ""},{"score": 1,"colour": "#D50000","description_ru": "Студия в провинции","description_en": ""}]},
+                    {"id": "climate","order": 8,"name_ru": "Климат","name_en": "Climate","palette": [{"score": 10,"colour": "#00C853","description_ru": "Вечная весна","description_en": ""},{"score": 9,"colour": "#1BCB3F","description_ru": "Мягкая зима","description_en": ""},{"score": 8,"colour": "#64DD17","description_ru": "","description_en": ""},{"score": 7,"colour": "#C6FF00","description_ru": "","description_en": ""},{"score": 6,"colour": "#FFEB3B","description_ru": "Хорошее лето","description_en": ""},{"score": 5,"colour": "#FFC107","description_ru": "Невыносимое лето","description_en": ""},{"score": 4,"colour": "#FF9800","description_ru": "","description_en": ""},{"score": 3,"colour": "#FF5722","description_ru": "","description_en": ""},{"score": 2,"colour": "#F44336","description_ru": "","description_en": ""},{"score": 1,"colour": "#D50000","description_ru": "Пустыня","description_en": ""}]},
+                    {"id": "money_cushion","order": 9,"name_ru": "Размер финансовой подушки","name_en": "Financial cushion size","palette": [{"score": 10,"colour": "#00C853","description_ru": "10M €","description_en": ""},{"score": 9,"colour": "#1BCB3F","description_ru": "1M €","description_en": ""},{"score": 8,"colour": "#64DD17","description_ru": "5 лет трат","description_en": ""},{"score": 7,"colour": "#C6FF00","description_ru": "2 года трат","description_en": ""},{"score": 6,"colour": "#FFEB3B","description_ru": "1 год трат","description_en": ""},{"score": 5,"colour": "#FFC107","description_ru": "","description_en": ""},{"score": 4,"colour": "#FF9800","description_ru": "","description_en": ""},{"score": 3,"colour": "#FF5722","description_ru": "От зарплаты до зарплаты","description_en": ""},{"score": 2,"colour": "#F44336","description_ru": "","description_en": ""},{"score": 1,"colour": "#D50000","description_ru": "Долги на годы","description_en": ""}]},
+                    {"id": "monthly_expenses","order": 10,"name_ru": "Ежемесячные траты","name_en": "Monthly expenses","palette": [{"score": 10,"colour": "#00C853","description_ru": "10k €","description_en": ""},{"score": 9,"colour": "#1BCB3F","description_ru": "","description_en": ""},{"score": 8,"colour": "#64DD17","description_ru": "5k €","description_en": ""},{"score": 7,"colour": "#C6FF00","description_ru": "","description_en": ""},{"score": 6,"colour": "#FFEB3B","description_ru": "","description_en": ""},{"score": 5,"colour": "#FFC107","description_ru": "","description_en": ""},{"score": 4,"colour": "#FF9800","description_ru": "","description_en": ""},{"score": 3,"colour": "#FF5722","description_ru": "","description_en": ""},{"score": 2,"colour": "#F44336","description_ru": "","description_en": ""},{"score": 1,"colour": "#D50000","description_ru": "Миска риса","description_en": ""}]}
+                ],
+                "options": []
+            }
+        }
+
+        // --- INITIALIZATION ---
+        // NEW: Load state from localStorage as soon as the page content is loaded.
+        document.addEventListener('DOMContentLoaded', async () => {
+            await loadState();
+            document.getElementById('language-switcher').value = state.lang;
+        });
+
+    </script>
+</body>
+</html>
