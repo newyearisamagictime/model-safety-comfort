@@ -35,10 +35,10 @@
         }
         /* Ensure sticky columns have a background in both standard and transposed views */
         .transposed-table .sticky-col, .standard-table .sticky-col {
-             background-color: #f9fafb;
+             background-color: inherit !important;
         }
          .transposed-table tr:hover .sticky-col, .standard-table tr:hover .sticky-col {
-             background-color: #f3f4f6; /* Slightly darker on hover */
+             filter: brightness(0.95);
         }
 
         .sticky-col-header {
@@ -307,6 +307,21 @@
             if (prevDesc && nextDesc) return `> ${prevDesc}, < ${nextDesc}`; if (prevDesc) return `> ${prevDesc}`; if (nextDesc) return `< ${nextDesc}`; return String(score);
         }
 
+        function calculateAverageScore(option) {
+            const scores = Object.values(option.scores).filter(score => score !== '' && score !== null && score !== undefined);
+            if (scores.length === 0) return null;
+            const sum = scores.reduce((acc, score) => acc + Number(score), 0);
+            return Math.round(sum / scores.length);
+        }
+
+        function getColorForAverageScore(averageScore) {
+            if (averageScore === null || state.parameters.length === 0) return '#FFFFFF';
+            const firstParam = state.parameters[0];
+            const colorMap = state.colorMap.get(firstParam.id);
+            if (!colorMap) return '#FFFFFF';
+            return colorMap.get(averageScore) || '#FFFFFF';
+        }
+
         // --- RENDERING LOGIC (Unchanged) ---
 
         function renderTable() {
@@ -352,9 +367,11 @@
 
             let bodyHTML = '';
             filteredOptions.forEach((option, optionIndex) => {
-                bodyHTML += `<tr class="bg-white hover:bg-gray-100 border-b border-gray-200" data-option-id="${option.id}">`;
-                bodyHTML += `<td class="p-3 text-sm text-gray-700 font-medium sticky-col" contenteditable="true" data-field="title">${option.title}</td>`;
-                bodyHTML += `<td class="p-3 text-sm text-gray-500 bg-white" contenteditable="true" data-field="price">${option.price}</td>`;
+                const averageScore = calculateAverageScore(option);
+                const rowColor = getColorForAverageScore(averageScore);
+                bodyHTML += `<tr class="hover:bg-gray-100 border-b border-gray-200" data-option-id="${option.id}" style="background-color: ${rowColor};">`;
+                bodyHTML += `<td class="p-3 text-sm text-gray-700 font-medium sticky-col" contenteditable="true" data-field="title" style="background-color: ${rowColor};">${option.title}</td>`;
+                bodyHTML += `<td class="p-3 text-sm text-gray-500" contenteditable="true" data-field="price" style="background-color: ${rowColor};">${option.price}</td>`;
                 state.parameters.forEach((param, paramIndex) => {
                     const score = option.scores[param.id] || '';
                     const color = state.colorMap.get(param.id)?.get(Number(score)) || '#FFFFFF';
@@ -367,7 +384,7 @@
                             <input type="number" min="1" max="10" value="${score}" class="score-input w-full h-full p-3 bg-transparent text-center font-semibold focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white">
                         </td>`;
                 });
-                bodyHTML += `<td class="p-3 text-center bg-white"><button class="text-red-500 hover:text-red-700 delete-option-btn" data-option-id="${option.id}">${getLangString('delete')}</button></td>`;
+                bodyHTML += `<td class="p-3 text-center" style="background-color: ${rowColor};"><button class="text-red-500 hover:text-red-700 delete-option-btn" data-option-id="${option.id}">${getLangString('delete')}</button></td>`;
                 bodyHTML += '</tr>';
             });
             body.innerHTML = bodyHTML;
