@@ -590,7 +590,7 @@
                 bodyHTML += `<td class="p-4 text-sm font-medium sticky-col" contenteditable="true" data-field="title" style="background-color: ${rowColor}; color: #ffffff;">
                     <span class="option-title">${option.title}</span><span class="average-score text-purple-300 font-bold">${averageScoreText}</span>
                 </td>`;
-                bodyHTML += `<td class="p-4 text-xs font-medium" contenteditable="true" data-field="price" style="background-color: ${rowColor}; color: #ffffff;">${option.price}</td>`;
+                bodyHTML += `<td class="p-4 text-xs font-medium" contenteditable="true" data-field="price" style="background-color: ${rowColor}; color: ${textColor};">${option.price}</td>`;
                 state.parameters.forEach((param, paramIndex) => {
                     const score = option.scores[param.id] || '';
                     const color = state.colorMap.get(param.id)?.get(Number(score)) || 'rgba(26, 26, 46, 0.6)';
