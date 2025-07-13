@@ -272,12 +272,8 @@
                 <h1 class="text-3xl md:text-4xl font-bold gradient-text fade-in-up">AI Life Parameters Analyzer</h1>
             </div>
             <div class="flex items-center space-x-3 flex-wrap gap-3">
-                <select id="language-switcher" class="modern-input text-sm min-w-[120px]">
-                    <option value="en">🇺🇸 English</option>
-                    <option value="ru">🇷🇺 Русский</option>
-                </select>
                  <button id="transpose-btn" class="ai-button hover-lift flex items-center space-x-2">
-                    <i data-lucide="rotate-90" class="ai-icon"></i>
+                    <i data-lucide="rotate-cw" class="ai-icon"></i>
                     <span data-lang-key="transpose_table">Transpose</span>
                 </button>
                 <button id="edit-params-btn" class="ai-button hover-lift flex items-center space-x-2">
@@ -889,8 +885,6 @@
             reader.readAsText(file); event.target.value = '';
         });
         
-        document.getElementById('language-switcher').addEventListener('change', (e) => { state.lang = e.target.value; localStorage.setItem('gemini.lang', state.lang); rebuildMappings(); updateUIText(); });
-
         // --- INITIAL DATA (Unchanged) ---
         function getInitialData() {
             return {
@@ -914,7 +908,6 @@
         // NEW: Load state from localStorage as soon as the page content is loaded.
         document.addEventListener('DOMContentLoaded', async () => {
             await loadState();
-            document.getElementById('language-switcher').value = state.lang;
             lucide.createIcons(); // Initialize icons after content is loaded
         });
 
