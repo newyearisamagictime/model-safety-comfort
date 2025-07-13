@@ -870,6 +870,17 @@
             state.isTransposed = !state.isTransposed;
             renderTable();
         });
+        
+        // NEW: Hotkey handler for transpose (Ctrl+Shift+Q)
+        document.addEventListener('keydown', (e) => {
+            // Check for Ctrl+Shift+Q (works for both English and Russian layouts)
+            if (e.ctrlKey && e.shiftKey && (e.code === 'KeyQ')) {
+                e.preventDefault();
+                state.isTransposed = !state.isTransposed;
+                renderTable();
+            }
+        });
+        
         document.getElementById('edit-params-btn').addEventListener('click', () => { renderParamEditor(); document.getElementById('param-editor-modal').classList.remove('hidden'); });
         document.getElementById('close-modal-btn').addEventListener('click', () => { document.getElementById('param-editor-modal').classList.add('hidden'); });
         
