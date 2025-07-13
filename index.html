@@ -499,7 +499,8 @@
         
         document.getElementById('add-param-btn').addEventListener('click', () => {
             const newId = `param_${Date.now()}`; const newOrder = state.parameters.length > 0 ? Math.max(...state.parameters.map(p => p.order)) + 1 : 1;
-            const newParam = { id: newId, order: newOrder, name_ru: getLangString('new_parameter_name'), name_en: getLangString('new_parameter_name'), palette: Array.from({ length: 10 }, (_, i) => ({ score: 10 - i, colour: "#cccccc", description_en: ``, description_ru: `` })) };
+            const defaultColors = ["#00C853", "#1BCB3F", "#64DD17", "#C6FF00", "#FFEB3B", "#FFC107", "#FF9800", "#FF5722", "#F44336", "#D50000"];
+            const newParam = { id: newId, order: newOrder, name_ru: getLangString('new_parameter_name'), name_en: getLangString('new_parameter_name'), palette: Array.from({ length: 10 }, (_, i) => ({ score: 10 - i, colour: defaultColors[i], description_en: ``, description_ru: `` })) };
             state.parameters.push(newParam); renderParamEditor();
         });
         
