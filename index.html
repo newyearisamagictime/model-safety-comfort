@@ -463,11 +463,22 @@
         const renderParamEditor = () => {
             const paramList = document.getElementById('param-list'); paramList.innerHTML = '';
             const nameKey = `name_${state.lang}`; const descKey = `description_${state.lang}`;
-            state.parameters.forEach((param) => {
+            state.parameters.forEach((param, paramIndex) => {
                 const paramDiv = document.createElement('div'); paramDiv.className = 'p-4 border rounded-lg bg-gray-50'; paramDiv.dataset.paramId = param.id;
                 let paletteHTML = ''; const sortedPalette = [...param.palette].sort((a, b) => b.score - a.score);
                 sortedPalette.forEach(p => { paletteHTML += `<div class="grid grid-cols-12 gap-2 items-center mb-1"><span class="col-span-1 text-center font-medium">${p.score}</span><div class="col-span-2"><input type="color" value="${p.colour}" data-score="${p.score}" data-field="colour" class="w-full h-8 border-none rounded cursor-pointer"></div><div class="col-span-9"><input type="text" value="${p[descKey] || p.description_en || ''}" data-score="${p.score}" data-field="description" class="w-full p-1 border border-gray-300 rounded-md text-sm"></div></div>`; });
-                paramDiv.innerHTML = `<div class="flex justify-between items-center mb-3"><input type="text" value="${param[nameKey] || param.name_en}" data-field="name" class="text-lg font-semibold border-b-2 border-transparent focus:border-indigo-500 focus:outline-none w-full"><button class="text-red-500 hover:text-red-700 ml-4 delete-param-btn" data-param-id="${param.id}" title="Удалить"><i class="fas fa-trash"></i></button></div><div class="grid grid-cols-12 gap-2 text-sm font-semibold mb-2"><div class="col-span-1 text-center">${getLangString('score')}</div><div class="col-span-2">${getLangString('color')}</div><div class="col-span-9">${getLangString('description')}</div></div>${paletteHTML}`;
+                paramDiv.innerHTML = `<div class="flex justify-between items-center mb-3">
+                    <div class="flex items-center gap-2">
+                        <button class="text-gray-500 hover:text-gray-700 move-param-up-btn" data-param-id="${param.id}" title="Переместить вверх" ${paramIndex === 0 ? 'disabled' : ''}>
+                            <i class="fas fa-arrow-up"></i>
+                        </button>
+                        <button class="text-gray-500 hover:text-gray-700 move-param-down-btn" data-param-id="${param.id}" title="Переместить вниз" ${paramIndex === state.parameters.length - 1 ? 'disabled' : ''}>
+                            <i class="fas fa-arrow-down"></i>
+                        </button>
+                    </div>
+                    <input type="text" value="${param[nameKey] || param.name_en}" data-field="name" class="text-lg font-semibold border-b-2 border-transparent focus:border-indigo-500 focus:outline-none flex-1 mx-4">
+                    <button class="text-red-500 hover:text-red-700 delete-param-btn" data-param-id="${param.id}" title="Удалить"><i class="fas fa-trash"></i></button>
+                </div><div class="grid grid-cols-12 gap-2 text-sm font-semibold mb-2"><div class="col-span-1 text-center">${getLangString('score')}</div><div class="col-span-2">${getLangString('color')}</div><div class="col-span-9">${getLangString('description')}</div></div>${paletteHTML}`;
                 paramList.appendChild(paramDiv);
             });
         };
@@ -550,7 +561,14 @@
         document.getElementById('close-modal-btn').addEventListener('click', () => { document.getElementById('param-editor-modal').classList.add('hidden'); });
         
         // NEW: "Save" button in modal now saves state and redraws table
-        document.getElementById('save-params-btn').addEventListener('click', () => { saveState(); renderTable(); document.getElementById('param-editor-modal').classList.add('hidden'); });
+        document.getElementById('save-params-btn').addEventListener('click', () => { 
+            // Sort parameters by order before saving
+            state.parameters.sort((a, b) => a.order - b.order); 
+            rebuildMappings(); 
+            saveState(); 
+            renderTable(); 
+            document.getElementById('param-editor-modal').classList.add('hidden'); 
+        });
         
         document.getElementById('add-param-btn').addEventListener('click', () => {
             const newId = `param_${Date.now()}`; const newOrder = state.parameters.length > 0 ? Math.max(...state.parameters.map(p => p.order)) + 1 : 1;
@@ -580,7 +598,40 @@
         });
         
         document.getElementById('param-list').addEventListener('click', (e) => {
-            if(e.target.closest('.delete-param-btn')) { const pId = e.target.closest('.delete-param-btn').dataset.paramId; state.parameters = state.parameters.filter(p => p.id !== pId); state.options.forEach(opt => delete opt.scores[pId]); renderParamEditor(); }
+            if(e.target.closest('.move-param-up-btn')) {
+                const paramId = e.target.closest('.move-param-up-btn').dataset.paramId;
+                const currentIndex = state.parameters.findIndex(p => p.id === paramId);
+                if (currentIndex > 0) {
+                    // Swap with previous parameter
+                    [state.parameters[currentIndex], state.parameters[currentIndex - 1]] = [state.parameters[currentIndex - 1], state.parameters[currentIndex]];
+                    // Update order values
+                    state.parameters[currentIndex - 1].order = currentIndex;
+                    state.parameters[currentIndex].order = currentIndex + 1;
+                    rebuildMappings();
+                    renderParamEditor();
+                }
+            }
+            if(e.target.closest('.move-param-down-btn')) {
+                const paramId = e.target.closest('.move-param-down-btn').dataset.paramId;
+                const currentIndex = state.parameters.findIndex(p => p.id === paramId);
+                if (currentIndex < state.parameters.length - 1) {
+                    // Swap with next parameter
+                    [state.parameters[currentIndex], state.parameters[currentIndex + 1]] = [state.parameters[currentIndex + 1], state.parameters[currentIndex]];
+                    // Update order values
+                    state.parameters[currentIndex].order = currentIndex + 1;
+                    state.parameters[currentIndex + 1].order = currentIndex + 2;
+                    rebuildMappings();
+                    renderParamEditor();
+                }
+            }
+            if(e.target.closest('.delete-param-btn')) { 
+                const pId = e.target.closest('.delete-param-btn').dataset.paramId; 
+                state.parameters = state.parameters.filter(p => p.id !== pId); 
+                state.options.forEach(opt => delete opt.scores[pId]); 
+                // Update order values for remaining parameters
+                state.parameters.forEach((p, index) => p.order = index + 1);
+                renderParamEditor(); 
+            }
         });
         
         document.getElementById('export-btn').addEventListener('click', () => {
