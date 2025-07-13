@@ -76,6 +76,15 @@
         .score-cell.editing .score-input {
             display: block;
         }
+        
+        /* Disabled button styles */
+        button:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+        button:disabled:hover {
+            color: inherit !important;
+        }
     </style>
 </head>
 <body class="bg-gray-100 text-gray-800">
@@ -370,6 +379,7 @@
 
             let bodyHTML = '';
             filteredOptions.forEach((option, optionIndex) => {
+                const actualIndex = state.options.findIndex(o => o.id === option.id);
                 const averageScore = calculateAverageScore(option);
                 const rowColor = getColorForAverageScore(averageScore);
                 bodyHTML += `<tr class="hover:bg-gray-100 border-b border-gray-200" data-option-id="${option.id}" style="background-color: ${rowColor};">`;
@@ -388,7 +398,13 @@
                         </td>`;
                 });
                 bodyHTML += `<td class="p-3 text-center" style="background-color: ${rowColor};">
-                    <button class="text-blue-500 hover:text-blue-700 clone-option-btn mr-2" data-option-id="${option.id}" title="Клонировать">
+                    <button class="text-gray-500 hover:text-gray-700 move-up-btn mr-1" data-option-id="${option.id}" title="Переместить вверх" ${actualIndex === 0 ? 'disabled' : ''}>
+                        <i class="fas fa-arrow-up"></i>
+                    </button>
+                    <button class="text-gray-500 hover:text-gray-700 move-down-btn mr-2" data-option-id="${option.id}" title="Переместить вниз" ${actualIndex === state.options.length - 1 ? 'disabled' : ''}>
+                        <i class="fas fa-arrow-down"></i>
+                    </button>
+                    <button class="text-blue-500 hover:text-blue-700 clone-option-btn mr-1" data-option-id="${option.id}" title="Клонировать">
                         <i class="fas fa-copy"></i>
                     </button>
                     <button class="text-red-500 hover:text-red-700 delete-option-btn" data-option-id="${option.id}" title="Удалить">
@@ -461,6 +477,22 @@
             const target = e.target; const optionId = target.closest('[data-option-id]')?.dataset.optionId;
             if (!optionId) return; const option = state.options.find(o => o.id === optionId); if (!option) return;
             if (target.isContentEditable) { target.addEventListener('blur', () => { const field = target.dataset.field; if (field === 'title' || field === 'price') { option[field] = target.textContent; saveState(); } }, { once: true }); }
+            if (target.closest('.move-up-btn')) {
+                const currentIndex = state.options.findIndex(o => o.id === optionId);
+                if (currentIndex > 0) {
+                    [state.options[currentIndex], state.options[currentIndex - 1]] = [state.options[currentIndex - 1], state.options[currentIndex]];
+                    saveState();
+                    renderTable();
+                }
+            }
+            if (target.closest('.move-down-btn')) {
+                const currentIndex = state.options.findIndex(o => o.id === optionId);
+                if (currentIndex < state.options.length - 1) {
+                    [state.options[currentIndex], state.options[currentIndex + 1]] = [state.options[currentIndex + 1], state.options[currentIndex]];
+                    saveState();
+                    renderTable();
+                }
+            }
             if (target.closest('.clone-option-btn')) { 
                 const newId = `option_${Date.now()}`; 
                 const clonedOption = { 
