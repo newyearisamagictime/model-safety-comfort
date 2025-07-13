@@ -3,72 +3,147 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Comparative Life Parameters</title>
+    <title>AI Life Parameters Analyzer</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/lucide/0.263.1/lucide.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/lucide@latest/dist/umd/lucide.js"></script>
     <style>
         :root {
-            --toast-bg: #333;
-            --toast-text: #fff;
+            --toast-bg: #0f0f23;
+            --toast-text: #e5e7eb;
+            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --secondary-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            --dark-gradient: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 100%);
+            --glass-bg: rgba(255, 255, 255, 0.1);
+            --glass-border: rgba(255, 255, 255, 0.2);
         }
         html, body {
             height: 100%;
-            font-family: 'Inter', sans-serif;
+            font-family: 'Space Grotesk', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Open Sans', 'Helvetica Neue', sans-serif;
         }
         body {
-            background-color: #f3f4f6;
+            background: var(--dark-gradient);
+            color: #e5e7eb;
+        }
+        .glass-morphism {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+        }
+        .gradient-text {
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .ai-glow {
+            box-shadow: 0 0 30px rgba(102, 126, 234, 0.3);
+        }
+        .hover-lift {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .hover-lift:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 40px rgba(102, 126, 234, 0.4);
         }
         .table-container {
             width: 100%;
             overflow-x: auto;
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border-radius: 16px;
+            border: 1px solid var(--glass-border);
         }
         .sticky-header th {
             position: sticky;
             top: 0;
             z-index: 10;
+            background: rgba(15, 15, 35, 0.9);
+            backdrop-filter: blur(20px);
         }
         .sticky-col {
             position: sticky;
             left: 0;
             z-index: 5;
-            background-color: #f9fafb;
+            background: rgba(26, 26, 46, 0.8);
+            backdrop-filter: blur(20px);
         }
         /* Ensure sticky columns have a background in both standard and transposed views */
         .transposed-table .sticky-col, .standard-table .sticky-col {
-             background-color: inherit !important;
+             background: rgba(26, 26, 46, 0.8) !important;
+             backdrop-filter: blur(20px);
         }
          .transposed-table tr:hover .sticky-col, .standard-table tr:hover .sticky-col {
-             filter: brightness(0.95);
+             background: rgba(102, 126, 234, 0.2) !important;
         }
 
         .sticky-col-header {
             position: sticky;
             left: 0;
             z-index: 15;
+            background: rgba(15, 15, 35, 0.9);
+            backdrop-filter: blur(20px);
         }
         .toast-notification {
             position: fixed;
             bottom: 20px;
             left: 50%;
             transform: translateX(-50%);
-            background-color: var(--toast-bg);
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
             color: var(--toast-text);
-            padding: 12px 24px;
-            border-radius: 8px;
+            padding: 16px 32px;
+            border-radius: 12px;
+            border: 1px solid var(--glass-border);
             z-index: 1000;
             opacity: 0;
-            transition: opacity 0.3s ease, transform 0.3s ease;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             pointer-events: none;
+            font-weight: 500;
         }
         .toast-notification.show {
             opacity: 1;
             transform: translateX(-50%) translateY(0);
         }
 
+        /* Modern button styles */
+        .ai-button {
+            background: var(--primary-gradient);
+            border: none;
+            border-radius: 12px;
+            padding: 12px 24px;
+            color: white;
+            font-weight: 600;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+        .ai-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+        }
+        .ai-button:before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s;
+        }
+        .ai-button:hover:before {
+            left: 100%;
+        }
+
         /* Styles for showing text or input in a cell */
         .score-cell .score-input {
             display: none;
+            background: rgba(15, 15, 35, 0.8);
+            color: #e5e7eb;
+            border: 2px solid rgba(102, 126, 234, 0.5);
+            border-radius: 8px;
         }
         .score-cell.editing .score-text {
             display: none;
@@ -77,38 +152,144 @@
             display: block;
         }
         
-        /* Disabled button styles */
+        /* Modern disabled button styles */
         button:disabled {
-            opacity: 0.3;
+            opacity: 0.4;
             cursor: not-allowed;
+            transform: none !important;
+            box-shadow: none !important;
         }
         button:disabled:hover {
             color: inherit !important;
         }
+
+        /* Modern table styles */
+        .modern-table {
+            background: transparent;
+        }
+        .modern-table th {
+            background: rgba(15, 15, 35, 0.9);
+            color: #a855f7;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            font-size: 0.75rem;
+            padding: 16px 12px;
+        }
+        .modern-table td {
+            background: rgba(26, 26, 46, 0.6);
+            border-bottom: 1px solid rgba(102, 126, 234, 0.1);
+            transition: all 0.3s ease;
+        }
+        .modern-table tr:hover td {
+            background: rgba(102, 126, 234, 0.1);
+        }
+
+        /* Modern form elements */
+        .modern-input {
+            background: rgba(26, 26, 46, 0.8);
+            border: 2px solid rgba(102, 126, 234, 0.3);
+            border-radius: 12px;
+            color: #e5e7eb;
+            padding: 12px 16px;
+            transition: all 0.3s ease;
+        }
+        .modern-input:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 20px rgba(102, 126, 234, 0.3);
+            outline: none;
+        }
+        .modern-input::placeholder {
+            color: #6b7280;
+        }
+
+        /* Custom scrollbar */
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 8px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: rgba(26, 26, 46, 0.3);
+            border-radius: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: var(--primary-gradient);
+            border-radius: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(135deg, #7c3aed 0%, #8b5cf6 100%);
+        }
+
+        /* Enhanced animations */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        .fade-in-up {
+            animation: fadeInUp 0.6s ease-out;
+        }
+
+        /* Pulse animation for AI elements */
+        @keyframes pulse-glow {
+            0%, 100% {
+                box-shadow: 0 0 30px rgba(102, 126, 234, 0.3);
+            }
+            50% {
+                box-shadow: 0 0 50px rgba(102, 126, 234, 0.5);
+            }
+        }
+        .pulse-glow {
+            animation: pulse-glow 3s ease-in-out infinite;
+        }
+
+        /* Icon styles */
+        .ai-icon {
+            width: 20px;
+            height: 20px;
+            stroke-width: 2;
+            transition: all 0.3s ease;
+        }
+        .ai-icon:hover {
+            transform: scale(1.1);
+        }
     </style>
 </head>
-<body class="bg-gray-100 text-gray-800">
+<body class="bg-gray-900 text-gray-100 min-h-screen">
 
     <div id="app" class="container mx-auto p-4 md:p-6 lg:p-8">
         
         <!-- Header -->
-        <header class="flex flex-wrap justify-between items-center mb-6 gap-y-4">
-            <h1 class="text-2xl md:text-3xl font-bold text-gray-700 w-full md:w-auto">Comparative Life Parameters</h1>
-            <div class="flex items-center space-x-2 flex-wrap gap-2">
-                <select id="language-switcher" class="bg-white border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 text-sm">
-                    <option value="en">English</option>
-                    <option value="ru">Русский</option>
+        <header class="flex flex-wrap justify-between items-center mb-8 gap-y-6">
+            <div class="flex items-center space-x-4 w-full md:w-auto">
+                <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-500 to-blue-600 flex items-center justify-center ai-glow pulse-glow">
+                    <i data-lucide="brain-circuit" class="ai-icon text-white"></i>
+                </div>
+                <h1 class="text-3xl md:text-4xl font-bold gradient-text fade-in-up">AI Life Parameters Analyzer</h1>
+            </div>
+            <div class="flex items-center space-x-3 flex-wrap gap-3">
+                <select id="language-switcher" class="modern-input text-sm min-w-[120px]">
+                    <option value="en">🇺🇸 English</option>
+                    <option value="ru">🇷🇺 Русский</option>
                 </select>
-                 <button id="transpose-btn" class="bg-purple-600 text-white px-4 py-2 rounded-md shadow-sm hover:bg-purple-700 transition-colors">
+                 <button id="transpose-btn" class="ai-button hover-lift flex items-center space-x-2">
+                    <i data-lucide="rotate-90" class="ai-icon"></i>
                     <span data-lang-key="transpose_table">Transpose</span>
                 </button>
-                <button id="edit-params-btn" class="bg-indigo-600 text-white px-4 py-2 rounded-md shadow-sm hover:bg-indigo-700 transition-colors">
+                <button id="edit-params-btn" class="ai-button hover-lift flex items-center space-x-2">
+                    <i data-lucide="settings" class="ai-icon"></i>
                     <span data-lang-key="edit_parameters">Edit Parameters</span>
                 </button>
-                <button id="export-btn" class="bg-green-600 text-white px-4 py-2 rounded-md shadow-sm hover:bg-green-700 transition-colors">
+                <button id="export-btn" class="ai-button hover-lift flex items-center space-x-2">
+                    <i data-lucide="download" class="ai-icon"></i>
                     <span data-lang-key="export_json">Export JSON</span>
                 </button>
-                <label for="import-file" class="bg-blue-600 text-white px-4 py-2 rounded-md shadow-sm hover:bg-blue-700 transition-colors cursor-pointer">
+                <label for="import-file" class="ai-button hover-lift flex items-center space-x-2 cursor-pointer">
+                    <i data-lucide="upload" class="ai-icon"></i>
                     <span data-lang-key="import_json">Import JSON</span>
                     <input type="file" id="import-file" class="hidden" accept=".json">
                 </label>
@@ -116,13 +297,16 @@
         </header>
 
         <!-- Search / Filter -->
-        <div class="mb-4">
-            <input id="search-box" type="text" placeholder="Filter options..." data-lang-placeholder="filter_options" class="w-full md:w-1/3 p-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+        <div class="mb-6">
+            <div class="relative max-w-md">
+                <i data-lucide="search" class="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 ai-icon"></i>
+                <input id="search-box" type="text" placeholder="Filter options..." data-lang-placeholder="filter_options" class="modern-input w-full pl-12">
+            </div>
         </div>
 
         <!-- Main Table -->
-        <div id="table-container" class="table-container bg-white shadow-lg rounded-lg">
-            <table id="main-table" class="w-full text-left">
+        <div id="table-container" class="table-container glass-morphism ai-glow mb-6">
+            <table id="main-table" class="modern-table w-full text-left">
                 <thead id="table-header">
                     <!-- Header will be dynamically generated -->
                 </thead>
@@ -131,8 +315,9 @@
                 </tbody>
             </table>
         </div>
-        <div class="mt-4">
-            <button id="add-option-btn" class="bg-blue-500 text-white px-4 py-2 rounded-md shadow hover:bg-blue-600 transition-colors">
+        <div class="mt-6">
+            <button id="add-option-btn" class="ai-button hover-lift flex items-center space-x-2">
+                <i data-lucide="plus" class="ai-icon"></i>
                 <span data-lang-key="add_option">Add Option</span>
             </button>
         </div>
@@ -140,20 +325,27 @@
     </div>
 
     <!-- Parameter Editor Modal -->
-    <div id="param-editor-modal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-20">
-        <div class="relative top-20 mx-auto p-5 border w-full max-w-4xl shadow-lg rounded-md bg-white">
-            <div class="flex justify-between items-center mb-4">
-                <h3 class="text-xl font-bold" data-lang-key="parameter_editor">Parameter Editor</h3>
-                <button id="close-modal-btn" class="text-gray-500 hover:text-gray-800">&times;</button>
+    <div id="param-editor-modal" class="fixed inset-0 bg-black bg-opacity-60 backdrop-blur-sm overflow-y-auto h-full w-full hidden z-20">
+        <div class="relative top-20 mx-auto p-6 border-0 w-full max-w-4xl shadow-2xl rounded-2xl glass-morphism ai-glow">
+            <div class="flex justify-between items-center mb-6">
+                <div class="flex items-center space-x-3">
+                    <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-purple-500 to-blue-600 flex items-center justify-center">
+                        <i data-lucide="sliders-horizontal" class="ai-icon text-white w-4 h-4"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold gradient-text" data-lang-key="parameter_editor">Parameter Editor</h3>
+                </div>
+                <button id="close-modal-btn" class="text-gray-400 hover:text-gray-200 text-2xl font-bold w-8 h-8 flex items-center justify-center rounded-lg hover:bg-gray-700 transition-colors">&times;</button>
             </div>
-            <div id="param-list" class="space-y-4 max-h-[70vh] overflow-y-auto pr-2">
+            <div id="param-list" class="space-y-6 max-h-[70vh] overflow-y-auto pr-2 custom-scrollbar">
                 <!-- Parameter items will be dynamically generated -->
             </div>
-            <div class="mt-6 flex justify-between">
-                <button id="add-param-btn" class="bg-green-500 text-white px-4 py-2 rounded-md shadow hover:bg-green-600">
+            <div class="mt-8 flex justify-between">
+                <button id="add-param-btn" class="ai-button hover-lift flex items-center space-x-2" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);">
+                    <i data-lucide="plus-circle" class="ai-icon"></i>
                     <span data-lang-key="add_parameter">Add Parameter</span>
                 </button>
-                <button id="save-params-btn" class="bg-indigo-600 text-white px-4 py-2 rounded-md shadow hover:bg-indigo-700">
+                <button id="save-params-btn" class="ai-button hover-lift flex items-center space-x-2">
+                    <i data-lucide="save" class="ai-icon"></i>
                     <span data-lang-key="save_and_close">Save & Close</span>
                 </button>
             </div>
@@ -164,6 +356,8 @@
     <div id="toast" class="toast-notification"></div>
 
     <script type="module">
+        // Initialize Lucide icons
+        lucide.createIcons();
         // --- DATA AND STATE MANAGEMENT ---
         const state = {
             lang: 'ru', // Default to Russian
@@ -351,19 +545,20 @@
                 renderStandardBody(body);
             }
             if (state.parameters.length === 0) {
-                 body.innerHTML = `<tr><td colspan="3" class="text-center p-8"><h3 class="text-lg font-bold">${getLangString('no_params_title')}</h3><p>${getLangString('no_params_text')}</p></td></tr>`;
+                 body.innerHTML = `<tr><td colspan="3" class="text-center p-12"><div class="flex flex-col items-center space-y-4"><i data-lucide="settings" class="ai-icon w-16 h-16 text-gray-500"></i><h3 class="text-xl font-bold text-gray-300">${getLangString('no_params_title')}</h3><p class="text-gray-400">${getLangString('no_params_text')}</p></div></td></tr>`;
+                 lucide.createIcons();
             }
         }
 
         function renderStandardHeader(header) {
             const nameKey = `name_${state.lang}`;
             let headerHTML = '<tr>';
-            headerHTML += `<th class="p-3 text-sm font-semibold tracking-wide text-left sticky-col-header bg-gray-200">${getLangString('option_name')}</th>`;
-            headerHTML += `<th class="p-3 text-sm font-semibold tracking-wide text-left bg-gray-200">${getLangString('notes_price')}</th>`;
+            headerHTML += `<th class="p-4 text-xs font-bold tracking-wider text-left sticky-col-header gradient-text">${getLangString('option_name')}</th>`;
+            headerHTML += `<th class="p-4 text-xs font-bold tracking-wider text-left gradient-text">${getLangString('notes_price')}</th>`;
             state.parameters.forEach(param => {
-                headerHTML += `<th class="p-3 text-sm font-semibold tracking-wide text-left bg-gray-200">${param[nameKey] || param.name_en}</th>`;
+                headerHTML += `<th class="p-4 text-xs font-bold tracking-wider text-left gradient-text">${param[nameKey] || param.name_en}</th>`;
             });
-            headerHTML += `<th class="p-3 text-sm font-semibold tracking-wide text-center bg-gray-200">${getLangString('actions')}</th>`;
+            headerHTML += `<th class="p-4 text-xs font-bold tracking-wider text-center gradient-text">${getLangString('actions')}</th>`;
             headerHTML += '</tr>';
             header.innerHTML = headerHTML;
         }
@@ -373,7 +568,8 @@
             const filteredOptions = state.options.filter(opt => opt.title.toLowerCase().includes(filterText));
 
             if (state.parameters.length > 0 && filteredOptions.length === 0) {
-                 body.innerHTML = `<tr><td colspan="${state.parameters.length + 3}" class="text-center p-8"><h3 class="text-lg font-bold">${getLangString('no_options_title')}</h3><p>${getLangString('no_options_text')}</p></td></tr>`;
+                 body.innerHTML = `<tr><td colspan="${state.parameters.length + 3}" class="text-center p-12"><div class="flex flex-col items-center space-y-4"><i data-lucide="database" class="ai-icon w-16 h-16 text-gray-500"></i><h3 class="text-xl font-bold text-gray-300">${getLangString('no_options_title')}</h3><p class="text-gray-400">${getLangString('no_options_text')}</p></div></td></tr>`;
+                 lucide.createIcons();
                  return;
             }
 
@@ -382,48 +578,51 @@
                 const actualIndex = state.options.findIndex(o => o.id === option.id);
                 const averageScore = calculateAverageScore(option);
                 const rowColor = getColorForAverageScore(averageScore);
-                bodyHTML += `<tr class="hover:bg-gray-100 border-b border-gray-200" data-option-id="${option.id}" style="background-color: ${rowColor};">`;
-                bodyHTML += `<td class="p-3 text-sm text-gray-700 font-medium sticky-col" contenteditable="true" data-field="title" style="background-color: ${rowColor};">${option.title}</td>`;
-                bodyHTML += `<td class="p-3 text-sm text-gray-500" contenteditable="true" data-field="price" style="background-color: ${rowColor};">${option.price}</td>`;
+                bodyHTML += `<tr class="hover:bg-opacity-80 border-b border-gray-700 transition-all duration-200" data-option-id="${option.id}" style="background-color: ${rowColor};">`;
+                bodyHTML += `<td class="p-4 text-sm font-medium sticky-col" contenteditable="true" data-field="title" style="background-color: ${rowColor};">${option.title}</td>`;
+                bodyHTML += `<td class="p-4 text-sm text-gray-300" contenteditable="true" data-field="price" style="background-color: ${rowColor};">${option.price}</td>`;
                 state.parameters.forEach((param, paramIndex) => {
                     const score = option.scores[param.id] || '';
-                    const color = state.colorMap.get(param.id)?.get(Number(score)) || '#FFFFFF';
+                    const color = state.colorMap.get(param.id)?.get(Number(score)) || 'rgba(26, 26, 46, 0.6)';
                     const displayText = getDescriptionForScore(param.id, score);
                     bodyHTML += `
-                        <td class="p-0 text-center score-cell" style="background-color: ${color};" 
+                        <td class="p-0 text-center score-cell transition-all duration-200" style="background-color: ${color};" 
                             data-option-id="${option.id}" data-param-id="${param.id}" 
                             data-option-index="${optionIndex}" data-param-index="${paramIndex}">
-                            <span class="score-text p-3 block cursor-pointer text-xs h-full">${displayText}</span>
-                            <input type="number" min="1" max="10" value="${score}" class="score-input w-full h-full p-3 bg-transparent text-center font-semibold focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white">
+                            <span class="score-text p-4 block cursor-pointer text-xs h-full hover:bg-black hover:bg-opacity-20">${displayText}</span>
+                            <input type="number" min="1" max="10" value="${score}" class="score-input w-full h-full p-4 bg-transparent text-center font-semibold focus:outline-none focus:ring-2 focus:ring-purple-500">
                         </td>`;
                 });
-                bodyHTML += `<td class="p-3 text-center" style="background-color: ${rowColor};">
-                    <button class="text-gray-500 hover:text-gray-700 move-up-btn mr-1" data-option-id="${option.id}" title="Переместить вверх" ${actualIndex === 0 ? 'disabled' : ''}>
-                        <i class="fas fa-arrow-up"></i>
-                    </button>
-                    <button class="text-gray-500 hover:text-gray-700 move-down-btn mr-2" data-option-id="${option.id}" title="Переместить вниз" ${actualIndex === state.options.length - 1 ? 'disabled' : ''}>
-                        <i class="fas fa-arrow-down"></i>
-                    </button>
-                    <button class="text-blue-500 hover:text-blue-700 clone-option-btn mr-1" data-option-id="${option.id}" title="Клонировать">
-                        <i class="fas fa-copy"></i>
-                    </button>
-                    <button class="text-red-500 hover:text-red-700 delete-option-btn" data-option-id="${option.id}" title="Удалить">
-                        <i class="fas fa-trash"></i>
-                    </button>
+                bodyHTML += `<td class="p-4 text-center" style="background-color: ${rowColor};">
+                    <div class="flex items-center justify-center space-x-2">
+                        <button class="text-gray-400 hover:text-purple-400 move-up-btn transition-colors" data-option-id="${option.id}" title="Переместить вверх" ${actualIndex === 0 ? 'disabled' : ''}>
+                            <i data-lucide="arrow-up" class="ai-icon w-4 h-4"></i>
+                        </button>
+                        <button class="text-gray-400 hover:text-purple-400 move-down-btn transition-colors" data-option-id="${option.id}" title="Переместить вниз" ${actualIndex === state.options.length - 1 ? 'disabled' : ''}>
+                            <i data-lucide="arrow-down" class="ai-icon w-4 h-4"></i>
+                        </button>
+                        <button class="text-blue-400 hover:text-blue-300 clone-option-btn transition-colors" data-option-id="${option.id}" title="Клонировать">
+                            <i data-lucide="copy" class="ai-icon w-4 h-4"></i>
+                        </button>
+                        <button class="text-red-400 hover:text-red-300 delete-option-btn transition-colors" data-option-id="${option.id}" title="Удалить">
+                            <i data-lucide="trash-2" class="ai-icon w-4 h-4"></i>
+                        </button>
+                    </div>
                 </td>`;
                 bodyHTML += '</tr>';
             });
             body.innerHTML = bodyHTML;
+            lucide.createIcons();
         }
 
         function renderTransposedHeader(header) {
             let headerHTML = '<tr>';
-            headerHTML += `<th class="p-3 text-sm font-semibold tracking-wide text-left sticky-col-header bg-gray-200">${getLangString('parameter')}</th>`;
+            headerHTML += `<th class="p-4 text-xs font-bold tracking-wider text-left sticky-col-header gradient-text">${getLangString('parameter')}</th>`;
             const filterText = document.getElementById('search-box').value.toLowerCase();
             const filteredOptions = state.options.filter(opt => opt.title.toLowerCase().includes(filterText));
 
             filteredOptions.forEach(option => {
-                headerHTML += `<th class="p-3 text-sm font-semibold tracking-wide text-left bg-gray-200">${option.title}</th>`;
+                headerHTML += `<th class="p-4 text-xs font-bold tracking-wider text-left gradient-text">${option.title}</th>`;
             });
             headerHTML += '</tr>';
             header.innerHTML = headerHTML;
@@ -435,52 +634,75 @@
             const filteredOptions = state.options.filter(opt => opt.title.toLowerCase().includes(filterText));
             
             if (state.parameters.length > 0 && filteredOptions.length === 0) {
-                 body.innerHTML = `<tr><td colspan="${state.parameters.length + 1}" class="text-center p-8"><h3 class="text-lg font-bold">${getLangString('no_options_title')}</h3><p>${getLangString('no_options_text')}</p></td></tr>`;
+                 body.innerHTML = `<tr><td colspan="${state.parameters.length + 1}" class="text-center p-12"><div class="flex flex-col items-center space-y-4"><i data-lucide="database" class="ai-icon w-16 h-16 text-gray-500"></i><h3 class="text-xl font-bold text-gray-300">${getLangString('no_options_title')}</h3><p class="text-gray-400">${getLangString('no_options_text')}</p></div></td></tr>`;
+                 lucide.createIcons();
                  return;
             }
 
             let bodyHTML = '';
             state.parameters.forEach((param, paramIndex) => {
-                bodyHTML += `<tr class="bg-white hover:bg-gray-100 border-b border-gray-200" data-param-id="${param.id}">`;
-                bodyHTML += `<td class="p-3 text-sm text-gray-700 font-medium sticky-col">${param[nameKey] || param.name_en}</td>`;
+                bodyHTML += `<tr class="hover:bg-opacity-80 border-b border-gray-700 transition-all duration-200" data-param-id="${param.id}">`;
+                bodyHTML += `<td class="p-4 text-sm font-medium sticky-col">${param[nameKey] || param.name_en}</td>`;
                 filteredOptions.forEach((option, optionIndex) => {
                     const score = option.scores[param.id] || '';
-                    const color = state.colorMap.get(param.id)?.get(Number(score)) || '#FFFFFF';
+                    const color = state.colorMap.get(param.id)?.get(Number(score)) || 'rgba(26, 26, 46, 0.6)';
                     const displayText = getDescriptionForScore(param.id, score);
                     bodyHTML += `
-                        <td class="p-0 text-center score-cell" style="background-color: ${color};" 
+                        <td class="p-0 text-center score-cell transition-all duration-200" style="background-color: ${color};" 
                             data-option-id="${option.id}" data-param-id="${param.id}" 
                             data-option-index="${optionIndex}" data-param-index="${paramIndex}">
-                            <span class="score-text p-3 block cursor-pointer text-xs h-full">${displayText}</span>
-                            <input type="number" min="1" max="10" value="${score}" class="score-input w-full h-full p-3 bg-transparent text-center font-semibold focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white">
+                            <span class="score-text p-4 block cursor-pointer text-xs h-full hover:bg-black hover:bg-opacity-20">${displayText}</span>
+                            <input type="number" min="1" max="10" value="${score}" class="score-input w-full h-full p-4 bg-transparent text-center font-semibold focus:outline-none focus:ring-2 focus:ring-purple-500">
                         </td>`;
                 });
                 bodyHTML += `</tr>`;
             });
             body.innerHTML = bodyHTML;
+            lucide.createIcons();
         }
 
         const renderParamEditor = () => {
             const paramList = document.getElementById('param-list'); paramList.innerHTML = '';
             const nameKey = `name_${state.lang}`; const descKey = `description_${state.lang}`;
             state.parameters.forEach((param, paramIndex) => {
-                const paramDiv = document.createElement('div'); paramDiv.className = 'p-4 border rounded-lg bg-gray-50'; paramDiv.dataset.paramId = param.id;
+                const paramDiv = document.createElement('div'); 
+                paramDiv.className = 'p-6 border border-gray-600 rounded-2xl glass-morphism'; 
+                paramDiv.dataset.paramId = param.id;
                 let paletteHTML = ''; const sortedPalette = [...param.palette].sort((a, b) => b.score - a.score);
-                sortedPalette.forEach(p => { paletteHTML += `<div class="grid grid-cols-12 gap-2 items-center mb-1"><span class="col-span-1 text-center font-medium">${p.score}</span><div class="col-span-2"><input type="color" value="${p.colour}" data-score="${p.score}" data-field="colour" class="w-full h-8 border-none rounded cursor-pointer"></div><div class="col-span-9"><input type="text" value="${p[descKey] || p.description_en || ''}" data-score="${p.score}" data-field="description" class="w-full p-1 border border-gray-300 rounded-md text-sm"></div></div>`; });
-                paramDiv.innerHTML = `<div class="flex justify-between items-center mb-3">
-                    <div class="flex items-center gap-2">
-                        <button class="text-gray-500 hover:text-gray-700 move-param-up-btn" data-param-id="${param.id}" title="Переместить вверх" ${paramIndex === 0 ? 'disabled' : ''}>
-                            <i class="fas fa-arrow-up"></i>
+                sortedPalette.forEach(p => { 
+                    paletteHTML += `<div class="grid grid-cols-12 gap-3 items-center mb-3">
+                        <span class="col-span-1 text-center font-bold text-purple-400 text-lg">${p.score}</span>
+                        <div class="col-span-2">
+                            <input type="color" value="${p.colour}" data-score="${p.score}" data-field="colour" class="w-full h-10 border-2 border-gray-600 rounded-lg cursor-pointer bg-transparent">
+                        </div>
+                        <div class="col-span-9">
+                            <input type="text" value="${p[descKey] || p.description_en || ''}" data-score="${p.score}" data-field="description" class="modern-input w-full text-sm">
+                        </div>
+                    </div>`; 
+                });
+                paramDiv.innerHTML = `<div class="flex justify-between items-center mb-4">
+                    <div class="flex items-center gap-3">
+                        <button class="text-gray-400 hover:text-purple-400 move-param-up-btn transition-colors" data-param-id="${param.id}" title="Переместить вверх" ${paramIndex === 0 ? 'disabled' : ''}>
+                            <i data-lucide="arrow-up" class="ai-icon"></i>
                         </button>
-                        <button class="text-gray-500 hover:text-gray-700 move-param-down-btn" data-param-id="${param.id}" title="Переместить вниз" ${paramIndex === state.parameters.length - 1 ? 'disabled' : ''}>
-                            <i class="fas fa-arrow-down"></i>
+                        <button class="text-gray-400 hover:text-purple-400 move-param-down-btn transition-colors" data-param-id="${param.id}" title="Переместить вниз" ${paramIndex === state.parameters.length - 1 ? 'disabled' : ''}>
+                            <i data-lucide="arrow-down" class="ai-icon"></i>
                         </button>
                     </div>
-                    <input type="text" value="${param[nameKey] || param.name_en}" data-field="name" class="text-lg font-semibold border-b-2 border-transparent focus:border-indigo-500 focus:outline-none flex-1 mx-4">
-                    <button class="text-red-500 hover:text-red-700 delete-param-btn" data-param-id="${param.id}" title="Удалить"><i class="fas fa-trash"></i></button>
-                </div><div class="grid grid-cols-12 gap-2 text-sm font-semibold mb-2"><div class="col-span-1 text-center">${getLangString('score')}</div><div class="col-span-2">${getLangString('color')}</div><div class="col-span-9">${getLangString('description')}</div></div>${paletteHTML}`;
+                    <input type="text" value="${param[nameKey] || param.name_en}" data-field="name" class="text-xl font-bold bg-transparent border-b-2 border-transparent focus:border-purple-500 focus:outline-none flex-1 mx-4 text-center gradient-text">
+                    <button class="text-red-400 hover:text-red-300 delete-param-btn transition-colors" data-param-id="${param.id}" title="Удалить">
+                        <i data-lucide="trash-2" class="ai-icon"></i>
+                    </button>
+                </div>
+                <div class="grid grid-cols-12 gap-3 text-sm font-bold mb-4 text-gray-400">
+                    <div class="col-span-1 text-center">${getLangString('score')}</div>
+                    <div class="col-span-2">${getLangString('color')}</div>
+                    <div class="col-span-9">${getLangString('description')}</div>
+                </div>
+                ${paletteHTML}`;
                 paramList.appendChild(paramDiv);
             });
+            lucide.createIcons();
         };
 
         // --- EVENT HANDLERS ---
@@ -676,6 +898,7 @@
         document.addEventListener('DOMContentLoaded', async () => {
             await loadState();
             document.getElementById('language-switcher').value = state.lang;
+            lucide.createIcons(); // Initialize icons after content is loaded
         });
 
     </script>
