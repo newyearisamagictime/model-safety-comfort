@@ -262,6 +262,11 @@
         .ai-icon:hover {
             transform: scale(1.1);
         }
+
+        /* Option title editing styles */
+        .sticky-col[contenteditable="true"]:focus .average-score {
+            display: none !important;
+        }
     </style>
 </head>
 <body class="bg-gray-900 text-gray-100 min-h-screen">
@@ -581,8 +586,11 @@
                 const rowColor = getColorForAverageScore(averageScore);
                 const textColor = getContrastTextColor(rowColor);
                 bodyHTML += `<tr class="hover:bg-opacity-80 border-b border-gray-700 transition-all duration-200" data-option-id="${option.id}" style="background-color: ${rowColor};">`;
-                bodyHTML += `<td class="p-4 text-sm font-medium sticky-col" contenteditable="true" data-field="title" style="background-color: ${rowColor}; color: ${textColor};">${option.title}</td>`;
-                bodyHTML += `<td class="p-4 text-xs font-medium" contenteditable="true" data-field="price" style="background-color: ${rowColor}; color: ${textColor};">${option.price}</td>`;
+                const averageScoreText = averageScore !== null ? ` (${averageScore})` : '';
+                bodyHTML += `<td class="p-4 text-sm font-medium sticky-col" contenteditable="true" data-field="title" style="background-color: ${rowColor}; color: #ffffff;">
+                    <span class="option-title">${option.title}</span><span class="average-score text-purple-300 font-bold">${averageScoreText}</span>
+                </td>`;
+                bodyHTML += `<td class="p-4 text-xs font-medium" contenteditable="true" data-field="price" style="background-color: ${rowColor}; color: #ffffff;">${option.price}</td>`;
                 state.parameters.forEach((param, paramIndex) => {
                     const score = option.scores[param.id] || '';
                     const color = state.colorMap.get(param.id)?.get(Number(score)) || 'rgba(26, 26, 46, 0.6)';
@@ -713,7 +721,52 @@
         function handleTableInteraction(e) {
             const target = e.target; const optionId = target.closest('[data-option-id]')?.dataset.optionId;
             if (!optionId) return; const option = state.options.find(o => o.id === optionId); if (!option) return;
-            if (target.isContentEditable) { target.addEventListener('blur', () => { const field = target.dataset.field; if (field === 'title' || field === 'price') { option[field] = target.textContent; saveState(); } }, { once: true }); }
+            if (target.isContentEditable) { 
+                // Handle focus event for title editing
+                target.addEventListener('focus', () => {
+                    if (target.dataset.field === 'title') {
+                        const averageSpan = target.querySelector('.average-score');
+                        if (averageSpan) averageSpan.style.display = 'none';
+                        // Set cursor to edit only the title text
+                        const titleSpan = target.querySelector('.option-title');
+                        if (titleSpan) {
+                            const range = document.createRange();
+                            const sel = window.getSelection();
+                            range.selectNodeContents(titleSpan);
+                            sel.removeAllRanges();
+                            sel.addRange(range);
+                        }
+                    }
+                }, { once: true });
+
+                target.addEventListener('blur', () => { 
+                    const field = target.dataset.field; 
+                    if (field === 'title' || field === 'price') { 
+                        if (field === 'title') {
+                            // Update only the title part, preserving the structure
+                            const titleSpan = target.querySelector('.option-title');
+                            if (titleSpan) {
+                                option[field] = titleSpan.textContent;
+                            } else {
+                                // Fallback: extract title from full text (remove average score part)
+                                const fullText = target.textContent;
+                                const titleText = fullText.replace(/\s*\(\d+\)\s*$/, '');
+                                option[field] = titleText;
+                            }
+                            // Show average score again and update it
+                            const averageSpan = target.querySelector('.average-score');
+                            if (averageSpan) {
+                                averageSpan.style.display = 'inline';
+                                const averageScore = calculateAverageScore(option);
+                                averageSpan.textContent = averageScore !== null ? ` (${averageScore})` : '';
+                            }
+                        } else {
+                            option[field] = target.textContent;
+                        }
+                        saveState(); 
+                    } 
+                }, { once: true }); 
+            }
             if (target.closest('.move-up-btn')) {
                 const currentIndex = state.options.findIndex(o => o.id === optionId);
                 if (currentIndex > 0) {
@@ -763,6 +816,25 @@
                 input.style.color = textColor;
                 const scoreText = scoreCell.querySelector('.score-text');
                 if (scoreText) scoreText.style.color = textColor;
+                
+                // Update average score in option title
+                const optionRow = document.querySelector(`tr[data-option-id="${optionId}"]`);
+                if (optionRow) {
+                    const averageSpan = optionRow.querySelector('.average-score');
+                    if (averageSpan) {
+                        const averageScore = calculateAverageScore(option);
+                        averageSpan.textContent = averageScore !== null ? ` (${averageScore})` : '';
+                    }
+                    // Update row background color based on new average
+                    const averageScore = calculateAverageScore(option);
+                    const rowColor = getColorForAverageScore(averageScore);
+                    optionRow.style.backgroundColor = rowColor;
+                    const titleCell = optionRow.querySelector('td[data-field="title"]');
+                    const priceCell = optionRow.querySelector('td[data-field="price"]');
+                    if (titleCell) titleCell.style.backgroundColor = rowColor;
+                    if (priceCell) priceCell.style.backgroundColor = rowColor;
+                }
+                
                 saveState(); 
             }
         }
