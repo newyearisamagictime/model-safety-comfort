@@ -179,6 +179,7 @@
                 add_parameter: "Add Parameter",
                 save_and_close: "Save & Close",
                 delete: "Delete",
+                clone: "Clone",
                 score: "Score",
                 color: "Color",
                 description: "Description",
@@ -210,6 +211,7 @@
                 add_parameter: "Добавить параметр",
                 save_and_close: "Сохранить и закрыть",
                 delete: "Удалить",
+                clone: "Клонировать",
                 score: "Оценка",
                 color: "Цвет",
                 description: "Описание",
@@ -384,7 +386,10 @@
                             <input type="number" min="1" max="10" value="${score}" class="score-input w-full h-full p-3 bg-transparent text-center font-semibold focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white">
                         </td>`;
                 });
-                bodyHTML += `<td class="p-3 text-center" style="background-color: ${rowColor};"><button class="text-red-500 hover:text-red-700 delete-option-btn" data-option-id="${option.id}">${getLangString('delete')}</button></td>`;
+                bodyHTML += `<td class="p-3 text-center" style="background-color: ${rowColor};">
+                    <button class="text-blue-500 hover:text-blue-700 clone-option-btn mr-2" data-option-id="${option.id}" title="Клонировать">📋</button>
+                    <button class="text-red-500 hover:text-red-700 delete-option-btn" data-option-id="${option.id}">${getLangString('delete')}</button>
+                </td>`;
                 bodyHTML += '</tr>';
             });
             body.innerHTML = bodyHTML;
@@ -451,6 +456,19 @@
             const target = e.target; const optionId = target.closest('[data-option-id]')?.dataset.optionId;
             if (!optionId) return; const option = state.options.find(o => o.id === optionId); if (!option) return;
             if (target.isContentEditable) { target.addEventListener('blur', () => { const field = target.dataset.field; if (field === 'title' || field === 'price') { option[field] = target.textContent; saveState(); } }, { once: true }); }
+            if (target.closest('.clone-option-btn')) { 
+                const newId = `option_${Date.now()}`; 
+                const clonedOption = { 
+                    id: newId, 
+                    title: option.title + ' (копия)', 
+                    price: option.price, 
+                    scores: { ...option.scores } 
+                }; 
+                const currentIndex = state.options.findIndex(o => o.id === optionId);
+                state.options.splice(currentIndex + 1, 0, clonedOption);
+                saveState(); 
+                renderTable(); 
+            }
             if (target.closest('.delete-option-btn')) { state.options = state.options.filter(o => o.id !== optionId); saveState(); renderTable(); }
             const scoreCell = target.closest('.score-cell'); if (scoreCell && !scoreCell.classList.contains('editing')) { scoreCell.classList.add('editing'); const input = scoreCell.querySelector('.score-input'); input.focus(); input.select(); }
         }
