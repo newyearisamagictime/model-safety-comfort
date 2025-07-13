@@ -584,13 +584,14 @@
                 state.parameters.forEach((param, paramIndex) => {
                     const score = option.scores[param.id] || '';
                     const color = state.colorMap.get(param.id)?.get(Number(score)) || 'rgba(26, 26, 46, 0.6)';
+                    const textColor = getContrastTextColor(color);
                     const displayText = getDescriptionForScore(param.id, score);
                     bodyHTML += `
-                        <td class="p-0 text-center score-cell transition-all duration-200" style="background-color: ${color};" 
+                        <td class="p-0 text-center score-cell transition-all duration-200" style="background-color: ${color}; color: ${textColor};" 
                             data-option-id="${option.id}" data-param-id="${param.id}" 
                             data-option-index="${optionIndex}" data-param-index="${paramIndex}">
-                            <span class="score-text p-4 block cursor-pointer text-xs h-full hover:bg-black hover:bg-opacity-20">${displayText}</span>
-                            <input type="number" min="1" max="10" value="${score}" class="score-input w-full h-full p-4 bg-transparent text-center font-semibold focus:outline-none focus:ring-2 focus:ring-purple-500">
+                            <span class="score-text p-4 block cursor-pointer text-xs h-full hover:bg-black hover:bg-opacity-20" style="color: ${textColor};">${displayText}</span>
+                            <input type="number" min="1" max="10" value="${score}" class="score-input w-full h-full p-4 bg-transparent text-center font-semibold focus:outline-none focus:ring-2 focus:ring-purple-500" style="color: ${textColor};">
                         </td>`;
                 });
                 bodyHTML += `<td class="p-4 text-center" style="background-color: ${rowColor};">
@@ -646,13 +647,14 @@
                 filteredOptions.forEach((option, optionIndex) => {
                     const score = option.scores[param.id] || '';
                     const color = state.colorMap.get(param.id)?.get(Number(score)) || 'rgba(26, 26, 46, 0.6)';
+                    const textColor = getContrastTextColor(color);
                     const displayText = getDescriptionForScore(param.id, score);
                     bodyHTML += `
-                        <td class="p-0 text-center score-cell transition-all duration-200" style="background-color: ${color};" 
+                        <td class="p-0 text-center score-cell transition-all duration-200" style="background-color: ${color}; color: ${textColor};" 
                             data-option-id="${option.id}" data-param-id="${param.id}" 
                             data-option-index="${optionIndex}" data-param-index="${paramIndex}">
-                            <span class="score-text p-4 block cursor-pointer text-xs h-full hover:bg-black hover:bg-opacity-20">${displayText}</span>
-                            <input type="number" min="1" max="10" value="${score}" class="score-input w-full h-full p-4 bg-transparent text-center font-semibold focus:outline-none focus:ring-2 focus:ring-purple-500">
+                            <span class="score-text p-4 block cursor-pointer text-xs h-full hover:bg-black hover:bg-opacity-20" style="color: ${textColor};">${displayText}</span>
+                            <input type="number" min="1" max="10" value="${score}" class="score-input w-full h-full p-4 bg-transparent text-center font-semibold focus:outline-none focus:ring-2 focus:ring-purple-500" style="color: ${textColor};">
                         </td>`;
                 });
                 bodyHTML += `</tr>`;
@@ -745,7 +747,22 @@
         
         function handleScoreInput(e) {
             const input = e.target; if (!input.matches('.score-input')) return; const scoreCell = input.closest('.score-cell'); const { optionId, paramId } = scoreCell.dataset; const option = state.options.find(o => o.id === optionId);
-            if (option) { let value = parseInt(input.value, 10); if (isNaN(value)) value = ''; else if (value < 1) value = 1; else if (value > 10) value = 10; input.value = value; option.scores[paramId] = value; scoreCell.style.backgroundColor = state.colorMap.get(paramId)?.get(value) || '#FFFFFF'; saveState(); }
+            if (option) { 
+                let value = parseInt(input.value, 10); 
+                if (isNaN(value)) value = ''; 
+                else if (value < 1) value = 1; 
+                else if (value > 10) value = 10; 
+                input.value = value; 
+                option.scores[paramId] = value; 
+                const newColor = state.colorMap.get(paramId)?.get(value) || 'rgba(26, 26, 46, 0.6)';
+                const textColor = getContrastTextColor(newColor);
+                scoreCell.style.backgroundColor = newColor;
+                scoreCell.style.color = textColor;
+                input.style.color = textColor;
+                const scoreText = scoreCell.querySelector('.score-text');
+                if (scoreText) scoreText.style.color = textColor;
+                saveState(); 
+            }
         }
 
         function handleScoreBlur(e) {
@@ -901,6 +918,46 @@
             lucide.createIcons(); // Initialize icons after content is loaded
         });
 
+        // Function to determine if a color is light or dark and return appropriate text color
+        function getContrastTextColor(color) {
+            // Handle rgba colors
+            if (color.startsWith('rgba')) {
+                // For rgba colors with transparency, assume dark background
+                return '#ffffff';
+            }
+            
+            // Handle hex colors
+            if (color.startsWith('#')) {
+                const hex = color.replace('#', '');
+                
+                // Convert hex to RGB
+                const r = parseInt(hex.substr(0, 2), 16);
+                const g = parseInt(hex.substr(2, 2), 16);
+                const b = parseInt(hex.substr(4, 2), 16);
+                
+                // Calculate luminance using the relative luminance formula
+                const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+                
+                // Return black text for light backgrounds, white text for dark backgrounds
+                return luminance > 0.6 ? '#000000' : '#ffffff';
+            }
+            
+            // Handle rgb colors
+            if (color.startsWith('rgb')) {
+                const matches = color.match(/rgb\((\d+),\s*(\d+),\s*(\d+)\)/);
+                if (matches) {
+                    const r = parseInt(matches[1]);
+                    const g = parseInt(matches[2]);
+                    const b = parseInt(matches[3]);
+                    
+                    const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+                    return luminance > 0.6 ? '#000000' : '#ffffff';
+                }
+            }
+            
+            // Default to white text for unknown color formats
+            return '#ffffff';
+        }
     </script>
 </body>
 </html>
