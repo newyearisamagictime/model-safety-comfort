@@ -3,363 +3,790 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Life Parameters Analyzer</title>
+    <title>Nexus Life Intelligence</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        'display': ['Inter', 'SF Pro Display', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
+                        'mono': ['SF Mono', 'Monaco', 'Consolas', 'monospace'],
+                    },
+                    animation: {
+                        'float': 'float 6s ease-in-out infinite',
+                        'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                        'shimmer': 'shimmer 2s linear infinite',
+                        'fade-in': 'fadeIn 0.5s ease-out',
+                        'slide-up': 'slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1)',
+                        'glow': 'glow 2s ease-in-out infinite alternate',
+                    },
+                    keyframes: {
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0px)' },
+                            '50%': { transform: 'translateY(-20px)' },
+                        },
+                        shimmer: {
+                            '0%': { transform: 'translateX(-100%)' },
+                            '100%': { transform: 'translateX(100%)' },
+                        },
+                        fadeIn: {
+                            '0%': { opacity: '0' },
+                            '100%': { opacity: '1' },
+                        },
+                        slideUp: {
+                            '0%': { opacity: '0', transform: 'translateY(20px)' },
+                            '100%': { opacity: '1', transform: 'translateY(0)' },
+                        },
+                        glow: {
+                            '0%': { boxShadow: '0 0 20px rgba(99, 102, 241, 0.2)' },
+                            '100%': { boxShadow: '0 0 40px rgba(99, 102, 241, 0.4)' },
+                        },
+                    },
+                    backdropBlur: {
+                        xs: '2px',
+                    },
+                    boxShadow: {
+                        'glass': '0 8px 32px rgba(31, 38, 135, 0.37)',
+                        'glow': '0 0 30px rgba(99, 102, 241, 0.3)',
+                        'inner-glow': 'inset 0 1px 0 rgba(255, 255, 255, 0.1)',
+                    },
+                },
+            },
+        }
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/lucide/0.263.1/lucide.min.css">
     <script src="https://cdn.jsdelivr.net/npm/lucide@latest/dist/umd/lucide.js"></script>
     <style>
         :root {
-            --toast-bg: #0f0f23;
-            --toast-text: #e5e7eb;
-            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            --secondary-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-            --dark-gradient: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 100%);
-            --glass-bg: rgba(255, 255, 255, 0.1);
-            --glass-border: rgba(255, 255, 255, 0.2);
+            /* Quantum Design System Variables */
+            --quantum-bg-primary: #0a0a0f;
+            --quantum-bg-secondary: #121218;
+            --quantum-bg-tertiary: #1a1a24;
+            --quantum-surface: rgba(255, 255, 255, 0.02);
+            --quantum-surface-elevated: rgba(255, 255, 255, 0.05);
+            --quantum-border: rgba(255, 255, 255, 0.08);
+            --quantum-border-active: rgba(99, 102, 241, 0.3);
+            
+            /* Neural Network Gradients */
+            --neural-primary: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #ec4899 100%);
+            --neural-secondary: linear-gradient(135deg, #06b6d4 0%, #3b82f6 50%, #6366f1 100%);
+            --neural-accent: linear-gradient(135deg, #10b981 0%, #06b6d4 100%);
+            --neural-danger: linear-gradient(135deg, #ef4444 0%, #f97316 100%);
+            
+            /* Typography Scale */
+            --font-display: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            --font-body: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            
+            /* Adaptive Color Tokens */
+            --text-primary: #ffffff;
+            --text-secondary: #a1a1aa;
+            --text-tertiary: #71717a;
+            --text-accent: #a855f7;
+            
+            /* Glass Morphism */
+            --glass-bg: rgba(255, 255, 255, 0.03);
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            
+            /* Motion Tokens */
+            --ease-elastic: cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            --ease-smooth: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            --ease-sharp: cubic-bezier(0.4, 0, 0.2, 1);
         }
-        html, body {
-            height: 100%;
-            font-family: 'Space Grotesk', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Open Sans', 'Helvetica Neue', sans-serif;
+
+        /* Base Layer: Foundation */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
+
+        html {
+            font-family: var(--font-body);
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            text-rendering: optimizeLegibility;
+        }
+
         body {
-            background: var(--dark-gradient);
-            color: #e5e7eb;
-        }
-        .glass-morphism {
-            background: var(--glass-bg);
-            backdrop-filter: blur(20px);
-            border: 1px solid var(--glass-border);
-        }
-        .gradient-text {
-            background: var(--primary-gradient);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-        .ai-glow {
-            box-shadow: 0 0 30px rgba(102, 126, 234, 0.3);
-        }
-        .hover-lift {
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        .hover-lift:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 40px rgba(102, 126, 234, 0.4);
-        }
-        .table-container {
-            width: 100%;
-            overflow-x: auto;
-            background: var(--glass-bg);
-            backdrop-filter: blur(20px);
-            border-radius: 16px;
-            border: 1px solid var(--glass-border);
-        }
-        .sticky-header th {
-            position: sticky;
-            top: 0;
-            z-index: 10;
-            background: rgba(15, 15, 35, 0.9);
-            backdrop-filter: blur(20px);
-        }
-        .sticky-col {
-            position: sticky;
-            left: 0;
-            z-index: 5;
-            background: rgba(26, 26, 46, 0.8);
-            backdrop-filter: blur(20px);
-        }
-        /* Ensure sticky columns have a background in both standard and transposed views */
-        .transposed-table .sticky-col, .standard-table .sticky-col {
-             background: rgba(26, 26, 46, 0.8) !important;
-             backdrop-filter: blur(20px);
-        }
-         .transposed-table tr:hover .sticky-col, .standard-table tr:hover .sticky-col {
-             background: rgba(102, 126, 234, 0.2) !important;
-        }
-
-        .sticky-col-header {
-            position: sticky;
-            left: 0;
-            z-index: 15;
-            background: rgba(15, 15, 35, 0.9);
-            backdrop-filter: blur(20px);
-        }
-        .toast-notification {
-            position: fixed;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: var(--glass-bg);
-            backdrop-filter: blur(20px);
-            color: var(--toast-text);
-            padding: 16px 32px;
-            border-radius: 12px;
-            border: 1px solid var(--glass-border);
-            z-index: 1000;
-            opacity: 0;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            pointer-events: none;
-            font-weight: 500;
-        }
-        .toast-notification.show {
-            opacity: 1;
-            transform: translateX(-50%) translateY(0);
-        }
-
-        /* Modern button styles */
-        .ai-button {
-            background: var(--primary-gradient);
-            border: none;
-            border-radius: 12px;
-            padding: 12px 24px;
-            color: white;
-            font-weight: 600;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            background: radial-gradient(ellipse at top, #1a1a2e 0%, #0a0a0f 100%);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
             position: relative;
+        }
+
+        /* Ambient Background Effects */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                radial-gradient(circle at 25% 25%, rgba(99, 102, 241, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 75% 75%, rgba(139, 92, 246, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 50% 50%, rgba(236, 72, 153, 0.05) 0%, transparent 70%);
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        /* Glass Morphism System */
+        .glass {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
+            border: 1px solid var(--glass-border);
+            box-shadow: var(--glass-shadow);
+        }
+
+        .glass-elevated {
+            background: var(--quantum-surface-elevated);
+            backdrop-filter: blur(24px) saturate(180%);
+            -webkit-backdrop-filter: blur(24px) saturate(180%);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            box-shadow: 
+                0 16px 64px rgba(0, 0, 0, 0.4),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+        }
+
+        /* Neural Button System */
+        .neural-btn {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 0.75rem;
+            font-weight: 600;
+            font-size: 0.875rem;
+            letter-spacing: 0.025em;
+            cursor: pointer;
+            transition: all 0.3s var(--ease-smooth);
             overflow: hidden;
+            background: var(--neural-primary);
+            color: white;
+            box-shadow: 
+                0 4px 16px rgba(99, 102, 241, 0.3),
+                inset 0 1px 0 rgba(255, 255, 255, 0.2);
         }
-        .ai-button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
-        }
-        .ai-button:before {
+
+        .neural-btn::before {
             content: '';
             position: absolute;
             top: 0;
             left: -100%;
             width: 100%;
             height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
-            transition: left 0.5s;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.6s ease;
         }
-        .ai-button:hover:before {
+
+        .neural-btn:hover::before {
             left: 100%;
         }
 
-        /* Styles for showing text or input in a cell */
-        .score-cell .score-input {
-            display: none;
-            background: rgba(15, 15, 35, 0.8);
-            color: #e5e7eb;
-            border: 2px solid rgba(102, 126, 234, 0.5);
-            border-radius: 8px;
+        .neural-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 
+                0 8px 32px rgba(99, 102, 241, 0.4),
+                inset 0 1px 0 rgba(255, 255, 255, 0.3);
         }
-        .score-cell.editing .score-text {
-            display: none;
+
+        .neural-btn:active {
+            transform: translateY(-1px);
         }
-        .score-cell.editing .score-input {
-            display: block;
+
+        .neural-btn-secondary {
+            background: var(--neural-secondary);
+            box-shadow: 
+                0 4px 16px rgba(6, 182, 212, 0.3),
+                inset 0 1px 0 rgba(255, 255, 255, 0.2);
         }
-        
-        /* Modern disabled button styles */
-        button:disabled {
+
+        .neural-btn-secondary:hover {
+            box-shadow: 
+                0 8px 32px rgba(6, 182, 212, 0.4),
+                inset 0 1px 0 rgba(255, 255, 255, 0.3);
+        }
+
+        .neural-btn-accent {
+            background: var(--neural-accent);
+            box-shadow: 
+                0 4px 16px rgba(16, 185, 129, 0.3),
+                inset 0 1px 0 rgba(255, 255, 255, 0.2);
+        }
+
+        .neural-btn-accent:hover {
+            box-shadow: 
+                0 8px 32px rgba(16, 185, 129, 0.4),
+                inset 0 1px 0 rgba(255, 255, 255, 0.3);
+        }
+
+        .neural-btn-danger {
+            background: var(--neural-danger);
+            box-shadow: 
+                0 4px 16px rgba(239, 68, 68, 0.3),
+                inset 0 1px 0 rgba(255, 255, 255, 0.2);
+        }
+
+        .neural-btn-danger:hover {
+            box-shadow: 
+                0 8px 32px rgba(239, 68, 68, 0.4),
+                inset 0 1px 0 rgba(255, 255, 255, 0.3);
+        }
+
+        .neural-btn:disabled {
             opacity: 0.4;
             cursor: not-allowed;
             transform: none !important;
             box-shadow: none !important;
         }
-        button:disabled:hover {
-            color: inherit !important;
+
+        /* Quantum Input System */
+        .quantum-input {
+            width: 100%;
+            padding: 1rem 1.25rem;
+            background: var(--quantum-surface);
+            border: 2px solid var(--quantum-border);
+            border-radius: 0.75rem;
+            color: var(--text-primary);
+            font-size: 0.875rem;
+            font-weight: 500;
+            transition: all 0.3s var(--ease-smooth);
+            outline: none;
+            backdrop-filter: blur(8px);
         }
 
-        /* Actions column white background override */
-        .actions-column {
-            background-color: #ffffff !important;
+        .quantum-input::placeholder {
+            color: var(--text-tertiary);
         }
 
-        /* Modern table styles */
-        .modern-table {
+        .quantum-input:focus {
+            border-color: var(--quantum-border-active);
+            background: var(--quantum-surface-elevated);
+            box-shadow: 
+                0 0 0 4px rgba(99, 102, 241, 0.1),
+                0 8px 16px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Adaptive Table System */
+        .nexus-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
             background: transparent;
         }
-        .modern-table th {
-            background: rgba(15, 15, 35, 0.9);
-            color: #a855f7;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
+
+        .nexus-table th {
+            background: var(--quantum-bg-tertiary);
+            padding: 1rem 0.75rem;
+            font-weight: 700;
             font-size: 0.75rem;
-            padding: 16px 12px;
-        }
-        .modern-table td {
-            background: rgba(26, 26, 46, 0.6);
-            border-bottom: 1px solid rgba(102, 126, 234, 0.1);
-            transition: all 0.3s ease;
-        }
-        .modern-table tr:hover td {
-            background: rgba(102, 126, 234, 0.1);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--text-accent);
+            border-bottom: 2px solid var(--quantum-border-active);
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            backdrop-filter: blur(20px);
         }
 
-        /* Modern form elements */
-        .modern-input {
-            background: rgba(26, 26, 46, 0.8);
-            border: 2px solid rgba(102, 126, 234, 0.3);
-            border-radius: 12px;
-            color: #e5e7eb;
-            padding: 12px 16px;
-            transition: all 0.3s ease;
+        .nexus-table td {
+            padding: 0.75rem;
+            border-bottom: 1px solid var(--quantum-border);
+            transition: all 0.3s var(--ease-smooth);
+            position: relative;
         }
-        .modern-input:focus {
-            border-color: #667eea;
-            box-shadow: 0 0 20px rgba(102, 126, 234, 0.3);
+
+        .nexus-table tbody tr {
+            background: var(--quantum-surface);
+            transition: all 0.3s var(--ease-smooth);
+        }
+
+        .nexus-table tbody tr:hover {
+            background: var(--quantum-surface-elevated);
+            transform: translateZ(0);
+        }
+
+        .nexus-table tbody tr:hover td {
+            border-color: var(--quantum-border-active);
+        }
+
+        /* Sticky Column Enhancements */
+        .sticky-col {
+            position: sticky;
+            left: 0;
+            z-index: 5;
+            backdrop-filter: blur(20px);
+        }
+
+        .sticky-col-header {
+            position: sticky;
+            left: 0;
+            z-index: 15;
+            backdrop-filter: blur(20px);
+        }
+
+        /* Score Cell Interactive System */
+        .score-cell {
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .score-cell::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, transparent 100%);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            pointer-events: none;
+        }
+
+        .score-cell:hover::before {
+            opacity: 1;
+        }
+
+        .score-cell .score-input {
+            display: none;
+            background: rgba(0, 0, 0, 0.3);
+            border: 2px solid var(--quantum-border-active);
+            border-radius: 0.5rem;
+            color: inherit;
+            font-weight: 600;
+            text-align: center;
             outline: none;
-        }
-        .modern-input::placeholder {
-            color: #6b7280;
+            width: 100%;
+            height: 100%;
+            padding: 0.5rem;
         }
 
-        /* Custom scrollbar */
-        .custom-scrollbar::-webkit-scrollbar {
+        .score-cell.editing .score-text {
+            display: none;
+        }
+
+        .score-cell.editing .score-input {
+            display: block;
+        }
+
+        /* Modern Scrollbar */
+        .quantum-scroll::-webkit-scrollbar {
             width: 8px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-track {
-            background: rgba(26, 26, 46, 0.3);
-            border-radius: 4px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb {
-            background: var(--primary-gradient);
-            border-radius: 4px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-            background: linear-gradient(135deg, #7c3aed 0%, #8b5cf6 100%);
+            height: 8px;
         }
 
-        /* Enhanced animations */
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+        .quantum-scroll::-webkit-scrollbar-track {
+            background: var(--quantum-surface);
+            border-radius: 4px;
         }
+
+        .quantum-scroll::-webkit-scrollbar-thumb {
+            background: var(--neural-primary);
+            border-radius: 4px;
+            border: 2px solid transparent;
+            background-clip: padding-box;
+        }
+
+        .quantum-scroll::-webkit-scrollbar-thumb:hover {
+            background: var(--neural-secondary);
+            background-clip: padding-box;
+        }
+
+        /* Toast Notification System */
+        .quantum-toast {
+            position: fixed;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 1rem;
+            padding: 1rem 1.5rem;
+            color: var(--text-primary);
+            font-weight: 500;
+            box-shadow: var(--glass-shadow);
+            z-index: 1000;
+            opacity: 0;
+            transition: all 0.5s var(--ease-elastic);
+            pointer-events: none;
+        }
+
+        .quantum-toast.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        /* Modal System */
+        .quantum-modal {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(8px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 50;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s var(--ease-smooth);
+        }
+
+        .quantum-modal.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .quantum-modal-content {
+            background: var(--quantum-bg-secondary);
+            border: 1px solid var(--quantum-border);
+            border-radius: 1.5rem;
+            max-width: 90vw;
+            max-height: 90vh;
+            overflow: hidden;
+            box-shadow: 
+                0 32px 128px rgba(0, 0, 0, 0.5),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            transform: scale(0.9) translateY(20px);
+            transition: all 0.3s var(--ease-elastic);
+        }
+
+        .quantum-modal.show .quantum-modal-content {
+            transform: scale(1) translateY(0);
+        }
+
+        /* Animation Classes */
         .fade-in-up {
-            animation: fadeInUp 0.6s ease-out;
+            animation: slideUp 0.6s var(--ease-smooth);
         }
 
-        /* Pulse animation for AI elements */
-        @keyframes pulse-glow {
-            0%, 100% {
-                box-shadow: 0 0 30px rgba(102, 126, 234, 0.3);
-            }
-            50% {
-                box-shadow: 0 0 50px rgba(102, 126, 234, 0.5);
-            }
-        }
         .pulse-glow {
-            animation: pulse-glow 3s ease-in-out infinite;
+            animation: glow 2s ease-in-out infinite alternate;
         }
 
-        /* Icon styles */
-        .ai-icon {
-            width: 20px;
-            height: 20px;
-            stroke-width: 2;
-            transition: all 0.3s ease;
+        .float {
+            animation: float 6s ease-in-out infinite;
         }
-        .ai-icon:hover {
+
+        /* Enhanced Icons */
+        .quantum-icon {
+            width: 1.25rem;
+            height: 1.25rem;
+            stroke-width: 2;
+            transition: all 0.3s var(--ease-smooth);
+        }
+
+        .quantum-icon:hover {
             transform: scale(1.1);
         }
 
-        /* Option title editing styles */
-        .sticky-col[contenteditable="true"]:focus .average-score {
-            display: none !important;
+        /* Content Editable Enhancements */
+        [contenteditable="true"]:focus {
+            outline: 2px solid var(--quantum-border-active);
+            outline-offset: 2px;
+            border-radius: 0.25rem;
+        }
+
+        /* Empty State Illustrations */
+        .empty-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 3rem 1rem;
+            text-align: center;
+        }
+
+        .empty-state-icon {
+            width: 4rem;
+            height: 4rem;
+            color: var(--text-tertiary);
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+
+        .empty-state-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+        }
+
+        .empty-state-description {
+            color: var(--text-tertiary);
+            max-width: 24rem;
+        }
+
+        /* Table Container with Advanced Glass Effect */
+        .table-container {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
+            border: 1px solid var(--glass-border);
+            border-radius: 1.5rem;
+            overflow: hidden;
+            box-shadow: 
+                0 16px 64px rgba(0, 0, 0, 0.3),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+        }
+
+        /* Actions Column */
+        .actions-column {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%) !important;
+            backdrop-filter: blur(10px);
+        }
+
+        /* Advanced Hover Effects */
+        .hover-lift {
+            transition: all 0.3s var(--ease-smooth);
+        }
+
+        .hover-lift:hover {
+            transform: translateY(-2px) translateZ(0);
+        }
+
+        /* Parameter Editor Specific Styles */
+        .param-item {
+            background: var(--quantum-surface);
+            border: 1px solid var(--quantum-border);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            transition: all 0.3s var(--ease-smooth);
+        }
+
+        .param-item:hover {
+            border-color: var(--quantum-border-active);
+            background: var(--quantum-surface-elevated);
+        }
+
+        /* Color Picker Enhancement */
+        input[type="color"] {
+            width: 2.5rem;
+            height: 2.5rem;
+            border: 2px solid var(--quantum-border);
+            border-radius: 0.5rem;
+            background: transparent;
+            cursor: pointer;
+            transition: all 0.3s var(--ease-smooth);
+        }
+
+        input[type="color"]:hover {
+            border-color: var(--quantum-border-active);
+            transform: scale(1.05);
+        }
+
+        /* Loading States */
+        .loading {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .loading::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            animation: shimmer 2s infinite;
+        }
+
+        /* Responsive Enhancements */
+        @media (max-width: 768px) {
+            .neural-btn {
+                padding: 0.6rem 1rem;
+                font-size: 0.8rem;
+            }
+            
+            .nexus-table th,
+            .nexus-table td {
+                padding: 0.5rem;
+                font-size: 0.8rem;
+            }
+            
+            .quantum-modal-content {
+                margin: 1rem;
+                max-width: calc(100vw - 2rem);
+            }
+        }
+
+        /* Dark Mode Optimizations */
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --text-primary: #ffffff;
+                --text-secondary: #a1a1aa;
+                --text-tertiary: #71717a;
+            }
+        }
+
+        /* High Contrast Mode */
+        @media (prefers-contrast: high) {
+            :root {
+                --quantum-border: rgba(255, 255, 255, 0.3);
+                --quantum-border-active: rgba(99, 102, 241, 0.8);
+            }
+        }
+
+        /* Reduced Motion */
+        @media (prefers-reduced-motion: reduce) {
+            *,
+            *::before,
+            *::after {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
         }
     </style>
 </head>
-<body class="bg-gray-900 text-gray-100 min-h-screen">
+<body class="quantum-scroll">
+    <!-- Ambient Particles Background -->
+    <div class="fixed inset-0 pointer-events-none">
+        <div class="absolute top-1/4 left-1/4 w-2 h-2 bg-blue-400 rounded-full opacity-20 animate-float"></div>
+        <div class="absolute top-3/4 right-1/4 w-1 h-1 bg-purple-400 rounded-full opacity-30 float" style="animation-delay: 2s;"></div>
+        <div class="absolute top-1/2 left-3/4 w-3 h-3 bg-pink-400 rounded-full opacity-10 float" style="animation-delay: 4s;"></div>
+    </div>
 
-    <div id="app" class="container mx-auto p-4 md:p-6 lg:p-8">
+    <div id="app" class="relative z-10 container mx-auto p-4 md:p-6 lg:p-8 max-w-7xl">
         
-        <!-- Header -->
-        <header class="flex flex-wrap justify-between items-center mb-8 gap-y-6">
-            <div class="flex items-center space-x-4 w-full md:w-auto">
-                <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-500 to-blue-600 flex items-center justify-center ai-glow pulse-glow">
-                    <i data-lucide="brain-circuit" class="ai-icon text-white"></i>
+        <!-- Revolutionary Header -->
+        <header class="mb-12 fade-in-up">
+            <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-8">
+                <!-- Brand Identity -->
+                <div class="flex items-center space-x-6">
+                    <div class="relative">
+                        <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 flex items-center justify-center pulse-glow">
+                            <i data-lucide="brain-circuit" class="quantum-icon w-8 h-8 text-white"></i>
+                        </div>
+                        <div class="absolute -inset-1 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 rounded-2xl blur opacity-30 animate-pulse"></div>
+                    </div>
+                    <div>
+                        <h1 class="text-4xl md:text-5xl font-black bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400 bg-clip-text text-transparent leading-tight">
+                            Nexus Life Intelligence
+                        </h1>
+                        <p class="text-gray-400 font-medium mt-1">Quantum Decision Matrix™</p>
+                    </div>
                 </div>
-                <h1 class="text-3xl md:text-4xl font-bold gradient-text fade-in-up">AI Life Parameters Analyzer</h1>
-            </div>
-            <div class="flex items-center space-x-3 flex-wrap gap-3">
-                 <button id="transpose-btn" class="ai-button hover-lift flex items-center space-x-2">
-                    <i data-lucide="rotate-cw" class="ai-icon"></i>
-                    <span data-lang-key="transpose_table">Transpose</span>
-                </button>
-                <button id="edit-params-btn" class="ai-button hover-lift flex items-center space-x-2">
-                    <i data-lucide="settings" class="ai-icon"></i>
-                    <span data-lang-key="edit_parameters">Edit Parameters</span>
-                </button>
-                <button id="export-btn" class="ai-button hover-lift flex items-center space-x-2">
-                    <i data-lucide="download" class="ai-icon"></i>
-                    <span data-lang-key="export_json">Export JSON</span>
-                </button>
-                <label for="import-file" class="ai-button hover-lift flex items-center space-x-2 cursor-pointer">
-                    <i data-lucide="upload" class="ai-icon"></i>
-                    <span data-lang-key="import_json">Import JSON</span>
-                    <input type="file" id="import-file" class="hidden" accept=".json">
-                </label>
+                
+                <!-- Action Bar -->
+                <div class="flex items-center flex-wrap gap-3">
+                    <button id="transpose-btn" class="neural-btn hover-lift group">
+                        <i data-lucide="rotate-cw" class="quantum-icon group-hover:rotate-180 transition-transform duration-500"></i>
+                        <span data-lang-key="transpose_table">Matrix View</span>
+                    </button>
+                    <button id="edit-params-btn" class="neural-btn neural-btn-secondary hover-lift">
+                        <i data-lucide="sliders-horizontal" class="quantum-icon"></i>
+                        <span data-lang-key="edit_parameters">Parameters</span>
+                    </button>
+                    <button id="export-btn" class="neural-btn neural-btn-accent hover-lift">
+                        <i data-lucide="download" class="quantum-icon"></i>
+                        <span data-lang-key="export_json">Export</span>
+                    </button>
+                    <label for="import-file" class="neural-btn neural-btn-accent hover-lift cursor-pointer">
+                        <i data-lucide="upload" class="quantum-icon"></i>
+                        <span data-lang-key="import_json">Import</span>
+                        <input type="file" id="import-file" class="hidden" accept=".json">
+                    </label>
+                </div>
             </div>
         </header>
 
-        <!-- Search / Filter -->
-        <div class="mb-6">
+        <!-- Intelligent Search -->
+        <div class="mb-8 fade-in-up" style="animation-delay: 0.1s;">
             <div class="relative max-w-md">
-                <i data-lucide="search" class="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 ai-icon"></i>
-                <input id="search-box" type="text" placeholder="Filter options..." data-lang-placeholder="filter_options" class="modern-input w-full pl-12">
+                <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                    <i data-lucide="search" class="quantum-icon text-gray-400"></i>
+                </div>
+                <input 
+                    id="search-box" 
+                    type="text" 
+                    placeholder="Search scenarios & parameters..." 
+                    data-lang-placeholder="filter_options" 
+                    class="quantum-input pl-12 pr-4"
+                >
+                <div class="absolute inset-0 rounded-xl bg-gradient-to-r from-indigo-500/10 via-purple-500/10 to-pink-500/10 pointer-events-none opacity-0 transition-opacity duration-300" id="search-glow"></div>
             </div>
         </div>
 
-        <!-- Main Table -->
-        <div id="table-container" class="table-container glass-morphism ai-glow mb-6">
-            <table id="main-table" class="modern-table w-full text-left">
+        <!-- Revolutionary Data Table -->
+        <div id="table-container" class="table-container mb-8 fade-in-up quantum-scroll" style="animation-delay: 0.2s;">
+            <table id="main-table" class="nexus-table">
                 <thead id="table-header">
-                    <!-- Header will be dynamically generated -->
+                    <!-- Dynamic header generation -->
                 </thead>
                 <tbody id="table-body">
-                    <!-- Body will be dynamically generated -->
+                    <!-- Dynamic body generation -->
                 </tbody>
             </table>
         </div>
-        <div class="mt-6">
-            <button id="add-option-btn" class="ai-button hover-lift flex items-center space-x-2">
-                <i data-lucide="plus" class="ai-icon"></i>
-                <span data-lang-key="add_option">Add Option</span>
+        
+        <!-- Quick Actions -->
+        <div class="fade-in-up" style="animation-delay: 0.3s;">
+            <button id="add-option-btn" class="neural-btn neural-btn-accent hover-lift group">
+                <i data-lucide="plus" class="quantum-icon group-hover:rotate-90 transition-transform duration-300"></i>
+                <span data-lang-key="add_option">Add Scenario</span>
             </button>
         </div>
 
     </div>
 
-    <!-- Parameter Editor Modal -->
-    <div id="param-editor-modal" class="fixed inset-0 bg-black bg-opacity-60 backdrop-blur-sm overflow-y-auto h-full w-full hidden z-20">
-        <div class="relative top-20 mx-auto p-6 border-0 w-full max-w-4xl shadow-2xl rounded-2xl glass-morphism ai-glow">
-            <div class="flex justify-between items-center mb-6">
-                <div class="flex items-center space-x-3">
-                    <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-purple-500 to-blue-600 flex items-center justify-center">
-                        <i data-lucide="sliders-horizontal" class="ai-icon text-white w-4 h-4"></i>
+    <!-- Quantum Parameter Editor Modal -->
+    <div id="param-editor-modal" class="quantum-modal">
+        <div class="quantum-modal-content w-full max-w-6xl mx-4">
+            <!-- Modal Header -->
+            <div class="p-8 border-b border-gray-700/50">
+                <div class="flex justify-between items-center">
+                    <div class="flex items-center space-x-4">
+                        <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center">
+                            <i data-lucide="settings" class="quantum-icon text-white"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-2xl font-bold bg-gradient-to-r from-cyan-400 to-blue-400 bg-clip-text text-transparent" data-lang-key="parameter_editor">
+                                Parameter Matrix
+                            </h3>
+                            <p class="text-gray-400 text-sm mt-1">Configure evaluation criteria and scoring scales</p>
+                        </div>
                     </div>
-                    <h3 class="text-2xl font-bold gradient-text" data-lang-key="parameter_editor">Parameter Editor</h3>
+                    <button id="close-modal-btn" class="w-10 h-10 rounded-xl bg-gray-700/50 hover:bg-gray-600/50 flex items-center justify-center transition-colors">
+                        <i data-lucide="x" class="quantum-icon"></i>
+                    </button>
                 </div>
-                <button id="close-modal-btn" class="text-gray-400 hover:text-gray-200 text-2xl font-bold w-8 h-8 flex items-center justify-center rounded-lg hover:bg-gray-700 transition-colors">&times;</button>
             </div>
-            <div id="param-list" class="space-y-6 max-h-[70vh] overflow-y-auto pr-2 custom-scrollbar">
-                <!-- Parameter items will be dynamically generated -->
-            </div>
-            <div class="mt-8 flex justify-between">
-                <button id="add-param-btn" class="ai-button hover-lift flex items-center space-x-2" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);">
-                    <i data-lucide="plus-circle" class="ai-icon"></i>
-                    <span data-lang-key="add_parameter">Add Parameter</span>
-                </button>
-                <button id="save-params-btn" class="ai-button hover-lift flex items-center space-x-2">
-                    <i data-lucide="save" class="ai-icon"></i>
-                    <span data-lang-key="save_and_close">Save & Close</span>
-                </button>
+            
+            <!-- Modal Content -->
+            <div class="p-8">
+                <div id="param-list" class="space-y-8 max-h-[60vh] overflow-y-auto quantum-scroll pr-4">
+                    <!-- Dynamic parameter items -->
+                </div>
+                
+                <!-- Modal Actions -->
+                <div class="mt-8 flex justify-between items-center pt-6 border-t border-gray-700/50">
+                    <button id="add-param-btn" class="neural-btn neural-btn-accent hover-lift">
+                        <i data-lucide="plus-circle" class="quantum-icon"></i>
+                        <span data-lang-key="add_parameter">Add Parameter</span>
+                    </button>
+                    <button id="save-params-btn" class="neural-btn hover-lift">
+                        <i data-lucide="save" class="quantum-icon"></i>
+                        <span data-lang-key="save_and_close">Save Changes</span>
+                    </button>
+                </div>
             </div>
         </div>
     </div>
     
-    <!-- Toast Notification -->
-    <div id="toast" class="toast-notification"></div>
+    <!-- Quantum Toast System -->
+    <div id="toast" class="quantum-toast"></div>
 
     <script type="module">
         // Initialize Lucide icons
@@ -376,18 +803,18 @@
 
         const i18n = {
             en: {
-                edit_parameters: "Edit Parameters",
-                export_json: "Export JSON",
-                import_json: "Import JSON",
-                transpose_table: "Transpose",
-                filter_options: "Filter options by name...",
-                option_name: "Option Name",
-                notes_price: "Notes / Price",
+                edit_parameters: "Parameters",
+                export_json: "Export",
+                import_json: "Import",
+                transpose_table: "Matrix View",
+                filter_options: "Search scenarios & parameters...",
+                option_name: "Scenario",
+                notes_price: "Notes / Context",
                 actions: "Actions",
-                add_option: "Add Option",
-                parameter_editor: "Parameter Editor",
+                add_option: "Add Scenario",
+                parameter_editor: "Parameter Matrix",
                 add_parameter: "Add Parameter",
-                save_and_close: "Save & Close",
+                save_and_close: "Save Changes",
                 delete: "Delete",
                 clone: "Clone",
                 score: "Score",
@@ -395,31 +822,31 @@
                 description: "Description",
                 parameter_name: "Parameter Name",
                 parameter: "Parameter",
-                new_option_name: "New Option",
-                new_option_notes: "Notes...",
+                new_option_name: "New Scenario",
+                new_option_notes: "Context notes...",
                 new_parameter_name: "New Parameter",
                 default_palette_desc: "Description for score",
                 import_success: "Data imported successfully!",
                 import_error: "Failed to read or parse JSON file.",
-                changes_saved: "Changes saved automatically.", // This message is no longer shown, but kept for i18n
-                no_params_title: "No Parameters Found",
-                no_params_text: "Click 'Edit Parameters' to get started.",
-                no_options_title: "No Options Found",
-                no_options_text: "Click 'Add Option' to create your first scenario.",
+                changes_saved: "Changes saved automatically.",
+                no_params_title: "No Parameters Configured",
+                no_params_text: "Click 'Parameters' to configure your evaluation criteria.",
+                no_options_title: "No Scenarios Found",
+                no_options_text: "Click 'Add Scenario' to create your first life option.",
             },
             ru: {
-                edit_parameters: "Ред. параметры",
-                export_json: "Экспорт JSON",
-                import_json: "Импорт JSON",
-                transpose_table: "Транспонировать",
-                filter_options: "Фильтр по названию...",
-                option_name: "Название опции",
-                notes_price: "Заметки / Цена",
+                edit_parameters: "Параметры",
+                export_json: "Экспорт",
+                import_json: "Импорт",
+                transpose_table: "Матрица",
+                filter_options: "Поиск сценариев и параметров...",
+                option_name: "Сценарий",
+                notes_price: "Заметки / Контекст",
                 actions: "Действия",
-                add_option: "Добавить опцию",
-                parameter_editor: "Редактор параметров",
+                add_option: "Добавить сценарий",
+                parameter_editor: "Матрица параметров",
                 add_parameter: "Добавить параметр",
-                save_and_close: "Сохранить и закрыть",
+                save_and_close: "Сохранить изменения",
                 delete: "Удалить",
                 clone: "Клонировать",
                 score: "Оценка",
@@ -427,17 +854,17 @@
                 description: "Описание",
                 parameter_name: "Название параметра",
                 parameter: "Параметр",
-                new_option_name: "Новая опция",
-                new_option_notes: "Заметки...",
+                new_option_name: "Новый сценарий",
+                new_option_notes: "Заметки о контексте...",
                 new_parameter_name: "Новый параметр",
                 default_palette_desc: "Описание для оценки",
                 import_success: "Данные успешно импортированы!",
                 import_error: "Не удалось прочитать или обработать JSON файл.",
-                changes_saved: "Изменения сохранены автоматически.", // Это сообщение больше не отображается, но оставлено для полноты i18n
-                no_params_title: "Параметры не найдены",
-                no_params_text: "Нажмите 'Ред. параметры', чтобы начать.",
-                no_options_title: "Опции не найдены",
-                no_options_text: "Нажмите 'Добавить опцию', чтобы создать первый сценарий.",
+                changes_saved: "Изменения сохранены автоматически.",
+                no_params_title: "Параметры не настроены",
+                no_params_text: "Нажмите 'Параметры', чтобы настроить критерии оценки.",
+                no_options_title: "Сценарии не найдены",
+                no_options_text: "Нажмите 'Добавить сценарий', чтобы создать первый вариант жизни.",
             }
         };
 
@@ -461,7 +888,7 @@
         
         // --- Utility Functions ---
 
-        // NEW: Убрано навязчивое уведомление. Теперь оно показывается только для важных событий (например, импорт).
+        // Enhanced toast notification with quantum design
         const showToast = (messageKey) => {
             const toast = document.getElementById('toast');
             toast.textContent = getLangString(messageKey);
@@ -551,7 +978,13 @@
                 renderStandardBody(body);
             }
             if (state.parameters.length === 0) {
-                 body.innerHTML = `<tr><td colspan="3" class="text-center p-12"><div class="flex flex-col items-center space-y-4"><i data-lucide="settings" class="ai-icon w-16 h-16 text-gray-500"></i><h3 class="text-xl font-bold text-gray-300">${getLangString('no_params_title')}</h3><p class="text-gray-400">${getLangString('no_params_text')}</p></div></td></tr>`;
+                 body.innerHTML = `<tr><td colspan="3" class="text-center p-12">
+                     <div class="empty-state">
+                         <i data-lucide="settings" class="empty-state-icon"></i>
+                         <h3 class="empty-state-title">${getLangString('no_params_title')}</h3>
+                         <p class="empty-state-description">${getLangString('no_params_text')}</p>
+                     </div>
+                 </td></tr>`;
                  lucide.createIcons();
             }
         }
@@ -559,12 +992,12 @@
         function renderStandardHeader(header) {
             const nameKey = `name_${state.lang}`;
             let headerHTML = '<tr>';
-            headerHTML += `<th class="p-4 text-xs font-bold tracking-wider text-left sticky-col-header gradient-text">${getLangString('option_name')}</th>`;
-            headerHTML += `<th class="p-4 text-xs font-bold tracking-wider text-left gradient-text">${getLangString('notes_price')}</th>`;
+            headerHTML += `<th class="p-4 text-xs font-bold tracking-wider text-left sticky-col-header bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent">${getLangString('option_name')}</th>`;
+            headerHTML += `<th class="p-4 text-xs font-bold tracking-wider text-left bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent">${getLangString('notes_price')}</th>`;
             state.parameters.forEach(param => {
-                headerHTML += `<th class="p-4 text-xs font-bold tracking-wider text-left gradient-text">${param[nameKey] || param.name_en}</th>`;
+                headerHTML += `<th class="p-4 text-xs font-bold tracking-wider text-left bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent">${param[nameKey] || param.name_en}</th>`;
             });
-            headerHTML += `<th class="p-4 text-xs font-bold tracking-wider text-center gradient-text">${getLangString('actions')}</th>`;
+            headerHTML += `<th class="p-4 text-xs font-bold tracking-wider text-center bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent">${getLangString('actions')}</th>`;
             headerHTML += '</tr>';
             header.innerHTML = headerHTML;
         }
@@ -574,7 +1007,13 @@
             const filteredOptions = state.options.filter(opt => opt.title.toLowerCase().includes(filterText));
 
             if (state.parameters.length > 0 && filteredOptions.length === 0) {
-                 body.innerHTML = `<tr><td colspan="${state.parameters.length + 3}" class="text-center p-12"><div class="flex flex-col items-center space-y-4"><i data-lucide="database" class="ai-icon w-16 h-16 text-gray-500"></i><h3 class="text-xl font-bold text-gray-300">${getLangString('no_options_title')}</h3><p class="text-gray-400">${getLangString('no_options_text')}</p></div></td></tr>`;
+                 body.innerHTML = `<tr><td colspan="${state.parameters.length + 3}" class="text-center p-12">
+                     <div class="empty-state">
+                         <i data-lucide="database" class="empty-state-icon"></i>
+                         <h3 class="empty-state-title">${getLangString('no_options_title')}</h3>
+                         <p class="empty-state-description">${getLangString('no_options_text')}</p>
+                     </div>
+                 </td></tr>`;
                  lucide.createIcons();
                  return;
             }
@@ -604,19 +1043,19 @@
                             <input type="number" min="1" max="10" value="${score}" class="score-input w-full h-full p-4 bg-transparent text-center font-semibold focus:outline-none focus:ring-2 focus:ring-purple-500" style="color: ${textColor};">
                         </td>`;
                 });
-                bodyHTML += `<td class="p-4 text-center bg-white" style="background-color: #ffffff;">
+                bodyHTML += `<td class="p-4 text-center actions-column" style="background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%) !important;">
                     <div class="flex items-center justify-center space-x-2">
-                        <button class="text-blue-600 hover:text-blue-800 move-up-btn transition-colors" data-option-id="${option.id}" title="Переместить вверх" ${actualIndex === 0 ? 'disabled' : ''}>
-                            <i data-lucide="chevron-up" class="ai-icon w-4 h-4"></i>
+                        <button class="text-blue-400 hover:text-blue-300 move-up-btn transition-colors group" data-option-id="${option.id}" title="Move up" ${actualIndex === 0 ? 'disabled' : ''}>
+                            <i data-lucide="chevron-up" class="quantum-icon group-hover:-translate-y-0.5 transition-transform"></i>
                         </button>
-                        <button class="text-blue-600 hover:text-blue-800 move-down-btn transition-colors" data-option-id="${option.id}" title="Переместить вниз" ${actualIndex === state.options.length - 1 ? 'disabled' : ''}>
-                            <i data-lucide="chevron-down" class="ai-icon w-4 h-4"></i>
+                        <button class="text-blue-400 hover:text-blue-300 move-down-btn transition-colors group" data-option-id="${option.id}" title="Move down" ${actualIndex === state.options.length - 1 ? 'disabled' : ''}>
+                            <i data-lucide="chevron-down" class="quantum-icon group-hover:translate-y-0.5 transition-transform"></i>
                         </button>
-                        <button class="text-blue-600 hover:text-blue-800 clone-option-btn transition-colors" data-option-id="${option.id}" title="Клонировать">
-                            <i data-lucide="copy" class="ai-icon w-4 h-4"></i>
+                        <button class="text-emerald-400 hover:text-emerald-300 clone-option-btn transition-colors group" data-option-id="${option.id}" title="Clone">
+                            <i data-lucide="copy" class="quantum-icon group-hover:scale-110 transition-transform"></i>
                         </button>
-                        <button class="text-red-600 hover:text-red-800 delete-option-btn transition-colors" data-option-id="${option.id}" title="Удалить">
-                            <i data-lucide="trash" class="ai-icon w-4 h-4"></i>
+                        <button class="text-red-400 hover:text-red-300 delete-option-btn transition-colors group" data-option-id="${option.id}" title="Delete">
+                            <i data-lucide="trash-2" class="quantum-icon group-hover:scale-110 transition-transform"></i>
                         </button>
                     </div>
                 </td>`;
@@ -628,12 +1067,12 @@
 
         function renderTransposedHeader(header) {
             let headerHTML = '<tr>';
-            headerHTML += `<th class="p-4 text-xs font-bold tracking-wider text-left sticky-col-header gradient-text">${getLangString('parameter')}</th>`;
+            headerHTML += `<th class="p-4 text-xs font-bold tracking-wider text-left sticky-col-header bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent">${getLangString('parameter')}</th>`;
             const filterText = document.getElementById('search-box').value.toLowerCase();
             const filteredOptions = state.options.filter(opt => opt.title.toLowerCase().includes(filterText));
 
             filteredOptions.forEach(option => {
-                headerHTML += `<th class="p-4 text-xs font-bold tracking-wider text-left gradient-text">${option.title}</th>`;
+                headerHTML += `<th class="p-4 text-xs font-bold tracking-wider text-left bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent">${option.title}</th>`;
             });
             headerHTML += '</tr>';
             header.innerHTML = headerHTML;
@@ -645,7 +1084,13 @@
             const filteredOptions = state.options.filter(opt => opt.title.toLowerCase().includes(filterText));
             
             if (state.parameters.length > 0 && filteredOptions.length === 0) {
-                 body.innerHTML = `<tr><td colspan="${state.parameters.length + 1}" class="text-center p-12"><div class="flex flex-col items-center space-y-4"><i data-lucide="database" class="ai-icon w-16 h-16 text-gray-500"></i><h3 class="text-xl font-bold text-gray-300">${getLangString('no_options_title')}</h3><p class="text-gray-400">${getLangString('no_options_text')}</p></div></td></tr>`;
+                 body.innerHTML = `<tr><td colspan="${state.parameters.length + 1}" class="text-center p-12">
+                     <div class="empty-state">
+                         <i data-lucide="database" class="empty-state-icon"></i>
+                         <h3 class="empty-state-title">${getLangString('no_options_title')}</h3>
+                         <p class="empty-state-description">${getLangString('no_options_text')}</p>
+                     </div>
+                 </td></tr>`;
                  lucide.createIcons();
                  return;
             }
@@ -674,44 +1119,61 @@
         }
 
         const renderParamEditor = () => {
-            const paramList = document.getElementById('param-list'); paramList.innerHTML = '';
-            const nameKey = `name_${state.lang}`; const descKey = `description_${state.lang}`;
+            const paramList = document.getElementById('param-list'); 
+            paramList.innerHTML = '';
+            const nameKey = `name_${state.lang}`; 
+            const descKey = `description_${state.lang}`;
+            
             state.parameters.forEach((param, paramIndex) => {
                 const paramDiv = document.createElement('div'); 
-                paramDiv.className = 'p-6 border border-gray-600 rounded-2xl glass-morphism'; 
+                paramDiv.className = 'param-item'; 
                 paramDiv.dataset.paramId = param.id;
-                let paletteHTML = ''; const sortedPalette = [...param.palette].sort((a, b) => b.score - a.score);
+                
+                let paletteHTML = ''; 
+                const sortedPalette = [...param.palette].sort((a, b) => b.score - a.score);
+                
                 sortedPalette.forEach(p => { 
-                    paletteHTML += `<div class="grid grid-cols-12 gap-3 items-center mb-3">
-                        <span class="col-span-1 text-center font-bold text-purple-400 text-lg">${p.score}</span>
+                    paletteHTML += `
+                    <div class="grid grid-cols-12 gap-4 items-center mb-4 group">
+                        <div class="col-span-1 text-center">
+                            <span class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 text-white font-bold text-sm">${p.score}</span>
+                        </div>
                         <div class="col-span-2">
-                            <input type="color" value="${p.colour}" data-score="${p.score}" data-field="colour" class="w-full h-10 border-2 border-gray-600 rounded-lg cursor-pointer bg-transparent">
+                            <input type="color" value="${p.colour}" data-score="${p.score}" data-field="colour" class="w-full h-12 border-2 border-gray-600 rounded-xl cursor-pointer transition-all duration-300 hover:border-indigo-500 hover:scale-105">
                         </div>
                         <div class="col-span-9">
-                            <input type="text" value="${p[descKey] || p.description_en || ''}" data-score="${p.score}" data-field="description" class="modern-input w-full text-sm">
+                            <input type="text" value="${p[descKey] || p.description_en || ''}" data-score="${p.score}" data-field="description" class="quantum-input text-sm">
                         </div>
                     </div>`; 
                 });
-                paramDiv.innerHTML = `<div class="flex justify-between items-center mb-4">
-                    <div class="flex items-center gap-3">
-                        <button class="text-gray-400 hover:text-purple-400 move-param-up-btn transition-colors" data-param-id="${param.id}" title="Переместить вверх" ${paramIndex === 0 ? 'disabled' : ''}>
-                            <i data-lucide="arrow-up" class="ai-icon"></i>
-                        </button>
-                        <button class="text-gray-400 hover:text-purple-400 move-param-down-btn transition-colors" data-param-id="${param.id}" title="Переместить вниз" ${paramIndex === state.parameters.length - 1 ? 'disabled' : ''}>
-                            <i data-lucide="arrow-down" class="ai-icon"></i>
-                        </button>
+                
+                paramDiv.innerHTML = `
+                <div class="flex justify-between items-center mb-6">
+                    <div class="flex items-center gap-4">
+                        <div class="flex flex-col gap-2">
+                            <button class="text-gray-400 hover:text-indigo-400 move-param-up-btn transition-colors group" data-param-id="${param.id}" title="Move up" ${paramIndex === 0 ? 'disabled' : ''}>
+                                <i data-lucide="arrow-up" class="quantum-icon group-hover:-translate-y-0.5 transition-transform"></i>
+                            </button>
+                            <button class="text-gray-400 hover:text-indigo-400 move-param-down-btn transition-colors group" data-param-id="${param.id}" title="Move down" ${paramIndex === state.parameters.length - 1 ? 'disabled' : ''}>
+                                <i data-lucide="arrow-down" class="quantum-icon group-hover:translate-y-0.5 transition-transform"></i>
+                            </button>
+                        </div>
+                        <input type="text" value="${param[nameKey] || param.name_en}" data-field="name" class="text-xl font-bold bg-transparent border-b-2 border-transparent focus:border-indigo-500 focus:outline-none flex-1 mx-4 bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent placeholder-gray-500" placeholder="Parameter name">
                     </div>
-                    <input type="text" value="${param[nameKey] || param.name_en}" data-field="name" class="text-xl font-bold bg-transparent border-b-2 border-transparent focus:border-purple-500 focus:outline-none flex-1 mx-4 text-center gradient-text">
-                    <button class="text-red-400 hover:text-red-300 delete-param-btn transition-colors" data-param-id="${param.id}" title="Удалить">
-                        <i data-lucide="trash-2" class="ai-icon"></i>
+                    <button class="text-red-400 hover:text-red-300 delete-param-btn transition-colors group" data-param-id="${param.id}" title="Delete">
+                        <i data-lucide="trash-2" class="quantum-icon group-hover:scale-110 transition-transform"></i>
                     </button>
                 </div>
-                <div class="grid grid-cols-12 gap-3 text-sm font-bold mb-4 text-gray-400">
-                    <div class="col-span-1 text-center">${getLangString('score')}</div>
-                    <div class="col-span-2">${getLangString('color')}</div>
-                    <div class="col-span-9">${getLangString('description')}</div>
-                </div>
-                ${paletteHTML}`;
+                
+                <div class="mb-6">
+                    <div class="grid grid-cols-12 gap-4 text-sm font-bold mb-4 text-gray-400 uppercase tracking-wider">
+                        <div class="col-span-1 text-center">${getLangString('score')}</div>
+                        <div class="col-span-2">${getLangString('color')}</div>
+                        <div class="col-span-9">${getLangString('description')}</div>
+                    </div>
+                    ${paletteHTML}
+                </div>`;
+                
                 paramList.appendChild(paramDiv);
             });
             lucide.createIcons();
@@ -787,7 +1249,7 @@
                 const newId = `option_${Date.now()}`; 
                 const clonedOption = { 
                     id: newId, 
-                    title: option.title + ' (копия)', 
+                    title: option.title + ' (copy)', 
                     price: option.price, 
                     scores: { ...option.scores } 
                 }; 
@@ -881,17 +1343,26 @@
             }
         });
         
-        document.getElementById('edit-params-btn').addEventListener('click', () => { renderParamEditor(); document.getElementById('param-editor-modal').classList.remove('hidden'); });
-        document.getElementById('close-modal-btn').addEventListener('click', () => { document.getElementById('param-editor-modal').classList.add('hidden'); });
+        // Enhanced modal system
+        document.getElementById('edit-params-btn').addEventListener('click', () => { 
+            renderParamEditor(); 
+            const modal = document.getElementById('param-editor-modal');
+            modal.classList.add('show');
+        });
         
-        // NEW: "Save" button in modal now saves state and redraws table
+        document.getElementById('close-modal-btn').addEventListener('click', () => { 
+            const modal = document.getElementById('param-editor-modal');
+            modal.classList.remove('show');
+        });
+        
+        // Enhanced save with visual feedback
         document.getElementById('save-params-btn').addEventListener('click', () => { 
-            // Sort parameters by order before saving
             state.parameters.sort((a, b) => a.order - b.order); 
             rebuildMappings(); 
             saveState(); 
             renderTable(); 
-            document.getElementById('param-editor-modal').classList.add('hidden'); 
+            const modal = document.getElementById('param-editor-modal');
+            modal.classList.remove('show');
         });
         
         document.getElementById('add-param-btn').addEventListener('click', () => {
@@ -913,7 +1384,28 @@
         tableBody.addEventListener('focusout', handleScoreBlur);
         tableBody.addEventListener('keydown', handleTableKeyDown);
 
-        document.getElementById('search-box').addEventListener('input', () => renderTable());
+        // Enhanced search with live visual feedback
+        const searchBox = document.getElementById('search-box');
+        const searchGlow = document.getElementById('search-glow');
+        
+        searchBox.addEventListener('input', () => {
+            if (searchBox.value.length > 0) {
+                searchGlow.style.opacity = '1';
+            } else {
+                searchGlow.style.opacity = '0';
+            }
+            renderTable();
+        });
+        
+        searchBox.addEventListener('focus', () => {
+            searchGlow.style.opacity = '1';
+        });
+        
+        searchBox.addEventListener('blur', () => {
+            if (searchBox.value.length === 0) {
+                searchGlow.style.opacity = '0';
+            }
+        });
         
         document.getElementById('param-list').addEventListener('input', (e) => {
              const t = e.target; const pDiv = t.closest('[data-param-id]'); if (!pDiv) return; const pId = pDiv.dataset.paramId; const p = state.parameters.find(p => p.id === pId); if (!p) return; const f = t.dataset.field;
